@@ -3524,42 +3524,63 @@ export const AdminDashboard: React.FC = () => {
                   <span>فيديو استعراضي للمنتج (اختياري)</span>
                 </label>
 
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", marginTop: "8px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
+                  {/* File Upload Option */}
+                  <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg"
+                      onChange={handleProductVideoUpload}
+                      id="video-upload-input"
+                      style={{ display: "none" }}
+                    />
+                    <label
+                      htmlFor="video-upload-input"
+                      className="btn btn-secondary"
+                      style={{ cursor: "pointer", fontSize: "12px", padding: "8px 16px", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                    >
+                      <Upload size={14} />
+                      <span>{isVideoUploading ? "جاري المعالجة..." : "رفع فيديو (.mp4) من الجهاز"}</span>
+                    </label>
+
+                    <span style={{ fontSize: "12px", color: "#94a3b8" }}>أو ضع رابط أونلاين:</span>
+                  </div>
+
+                  {/* Direct Video / YouTube URL Input */}
                   <input
-                    type="file"
-                    accept="video/mp4,video/webm,video/ogg"
-                    onChange={handleProductVideoUpload}
-                    id="video-upload-input"
-                    style={{ display: "none" }}
+                    type="text"
+                    placeholder="رابط فيديو مباشر (https://... أو رابط YouTube / Vimeo)"
+                    value={prodVideoUrl.startsWith("data:") ? "[تم رفع فيديو من الجهاز]" : prodVideoUrl}
+                    onChange={(e) => setProdVideoUrl(e.target.value)}
+                    className="admin-input"
+                    style={{ height: "38px", fontSize: "12px" }}
                   />
-                  <label
-                    htmlFor="video-upload-input"
-                    className="btn btn-secondary"
-                    style={{ cursor: "pointer", fontSize: "12px", padding: "8px 16px", display: "inline-flex", alignItems: "center", gap: "6px" }}
-                  >
-                    <Upload size={14} />
-                    <span>{isVideoUploading ? "جاري رفع الفيديو..." : "اختر فيديو من جهازك (.mp4)"}</span>
-                  </label>
 
                   {prodVideoUrl && (
                     <button
                       type="button"
                       onClick={() => setProdVideoUrl("")}
                       className="btn"
-                      style={{ backgroundColor: "#fee2e2", color: "#ef4444", fontSize: "12px", padding: "6px 12px", borderRadius: "6px", border: "1px solid #fca5a5" }}
+                      style={{ backgroundColor: "#fee2e2", color: "#ef4444", fontSize: "12px", padding: "6px 12px", borderRadius: "6px", border: "1px solid #fca5a5", alignSelf: "flex-start" }}
                     >
-                      حذف الفيديو
+                      حذف الفيديو الحالي
                     </button>
                   )}
                 </div>
-                
-                <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginTop: "6px" }}>
-                  ينصح بمقطع فيديو قصير (من 5 إلى 15 ثانية) بحجم أقل من 10MB لضمان سرعة فائقة للعملاء.
+
+                <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginTop: "8px" }}>
+                  💡 ملاحظة مهمة: الفيديوهات المرفوعة عبر روابط أونلاين (مثل MP4 مباشر أو YouTube) هي الأنسب والأسرع للتشغيل على أجهزة آيفون (iPhone) والموبايل.
                 </span>
 
                 {prodVideoUrl && (
                   <div style={{ marginTop: "12px", borderRadius: "10px", overflow: "hidden", border: "1px solid var(--border-color)", maxWidth: "260px" }}>
-                    <video src={prodVideoUrl} controls style={{ width: "100%", maxHeight: "180px", display: "block", backgroundColor: "#000000" }} />
+                    {prodVideoUrl.includes("youtube.com") || prodVideoUrl.includes("youtu.be") || prodVideoUrl.includes("vimeo.com") ? (
+                      <div style={{ padding: "10px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "12px", textAlign: "center" }}>
+                        🎬 رابط فيديو يوتيوب/فيميو (معاينة مفعلة)
+                      </div>
+                    ) : (
+                      <video src={prodVideoUrl} controls style={{ width: "100%", maxHeight: "180px", display: "block", backgroundColor: "#000000" }} />
+                    )}
                   </div>
                 )}
               </div>

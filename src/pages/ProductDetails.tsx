@@ -125,17 +125,56 @@ export const ProductDetails: React.FC = () => {
         {/* Left Column: Gallery */}
         <div className="gallery-container">
           <div className="gallery-main">
-            {activeMedia === "video" && product.videoUrl ? (
-              <video
-                src={product.videoUrl}
-                controls
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#000000" }}
-              />
-            ) : (
+            {activeMedia === "video" && product.videoUrl ? (() => {
+              const url = product.videoUrl;
+              if (url.includes("youtube.com/watch?v=")) {
+                const videoId = url.split("v=")[1]?.split("&")[0];
+                return (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
+                    title={product.name}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
+                  />
+                );
+              }
+              if (url.includes("youtu.be/")) {
+                const videoId = url.split("youtu.be/")[1]?.split("?")[0];
+                return (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
+                    title={product.name}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
+                  />
+                );
+              }
+              if (url.includes("vimeo.com/")) {
+                const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+                return (
+                  <iframe
+                    src={`https://player.vimeo.com/video/${videoId}?autoplay=1`}
+                    title={product.name}
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                    style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
+                  />
+                );
+              }
+              return (
+                <video
+                  src={product.videoUrl}
+                  controls
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#000000" }}
+                />
+              );
+            })() : (
               <img src={activeImage || prodImages[0]} alt={product.name || "منتج"} className="gallery-main-img" />
             )}
           </div>

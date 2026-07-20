@@ -231,40 +231,47 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Sync state changes with StorageService
+  // Sync state changes with StorageService & Cloud Database
   const updateTheme = (newTheme: ThemeConfig) => {
     StorageService.saveTheme(newTheme);
     setTheme(newTheme);
+    StorageService.syncToCloud().catch(err => console.error("Cloud sync error:", err));
   };
 
   const updateProducts = (newProducts: Product[]) => {
     StorageService.saveProducts(newProducts);
     setProducts(newProducts);
+    StorageService.syncToCloud().catch(err => console.error("Cloud sync error:", err));
   };
 
   const updateCategories = (newCategories: Category[]) => {
     StorageService.saveCategories(newCategories);
     setCategories(newCategories);
+    StorageService.syncToCloud().catch(err => console.error("Cloud sync error:", err));
   };
 
   const updateStoreInfo = (newInfo: StoreInfo) => {
     StorageService.saveStoreInfo(newInfo);
     setStoreInfo(newInfo);
+    StorageService.syncToCloud().catch(err => console.error("Cloud sync error:", err));
   };
 
   const updateHomepage = (newHomepage: HomepageBlocks) => {
     StorageService.saveHomepage(newHomepage);
     setHomepage(newHomepage);
+    StorageService.syncToCloud().catch(err => console.error("Cloud sync error:", err));
   };
 
   const updatePages = (newPages: StaticPagesContent) => {
     StorageService.savePages(newPages);
     setPages(newPages);
+    StorageService.syncToCloud().catch(err => console.error("Cloud sync error:", err));
   };
 
   const updateCoupons = (newCoupons: Coupon[]) => {
     StorageService.saveCoupons(newCoupons);
     setCoupons(newCoupons);
+    StorageService.syncToCloud().catch(err => console.error("Cloud sync error:", err));
   };
 
   const resetAll = () => {
