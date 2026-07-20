@@ -224,12 +224,18 @@ export const Navbar: React.FC = () => {
         <div
           className="cart-drawer-backdrop"
           onClick={() => setIsMobileMenuOpen(false)}
-          style={{ justifyContent: "flex-start", zIndex: 150 }}
+          style={{ justifyContent: "flex-end", zIndex: 150 }}
         >
           <div
             className="cart-drawer"
             onClick={(e) => e.stopPropagation()}
-            style={{ animationName: "slideLeft", maxWidth: "300px" }}
+            style={{ 
+              animationName: "slideRight", 
+              maxWidth: "300px",
+              borderLeft: "none",
+              borderRight: "1px solid var(--border-color)",
+              borderRadius: "var(--border-radius) 0 0 var(--border-radius)"
+            }}
           >
             <div className="drawer-header">
               <span className="drawer-title">قائمة التنقل</span>
