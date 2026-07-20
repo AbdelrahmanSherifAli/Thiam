@@ -555,7 +555,7 @@ export const StorageService = {
       }
 
       const cloudData = await response.json();
-      if (cloudData) {
+      if (cloudData && typeof cloudData === "object" && Object.keys(cloudData).length > 0) {
         if (cloudData.theme) localStorage.setItem(KEYS.THEME, JSON.stringify(cloudData.theme));
         if (cloudData.categories) localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(cloudData.categories));
         if (cloudData.products) localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(cloudData.products));
@@ -563,6 +563,11 @@ export const StorageService = {
         if (cloudData.homepage) localStorage.setItem(KEYS.HOMEPAGE, JSON.stringify(cloudData.homepage));
         if (cloudData.pages) localStorage.setItem(KEYS.PAGES, JSON.stringify(cloudData.pages));
         if (cloudData.coupons) localStorage.setItem(KEYS.COUPONS, JSON.stringify(cloudData.coupons));
+        return true;
+      } else {
+        // Cloud database is empty (null). Seed it with default store data!
+        console.log("Cloud database is empty. Seeding initial store data to cloud database...");
+        await this.syncToCloud();
         return true;
       }
     } catch (err) {
