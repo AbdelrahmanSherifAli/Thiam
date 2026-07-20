@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useStore } from "../context/StoreContext";
 import { useCart } from "../context/CartContext";
-import { Star, Heart, ShoppingCart, ArrowLeft } from "lucide-react";
+import { Star, Heart, ShoppingCart, ArrowLeft, Zap } from "lucide-react";
 import { getAdjustedPrice } from "../utils/price";
 
 export const ProductDetails: React.FC = () => {
@@ -80,6 +80,18 @@ export const ProductDetails: React.FC = () => {
     addToCart(product, quantity, selectedAttrs);
     setNotification("✓ تم إضافة المنتج إلى السلة بنجاح!");
     setTimeout(() => setNotification(null), 4000);
+  };
+
+  const handleBuyNow = () => {
+    if (product.isSoldOut) return;
+    const missing = prodAttributes.filter((attr) => attr.name && !selectedAttrs[attr.name]);
+    if (missing.length > 0) {
+      alert(`يرجى اختيار الخيارات لـ: ${missing.map((m) => m.name).join(", ")}`);
+      return;
+    }
+
+    addToCart(product, quantity, selectedAttrs);
+    setCurrentView("checkout");
   };
 
   const navigateToCategory = () => {
@@ -252,6 +264,34 @@ export const ProductDetails: React.FC = () => {
               <Heart size={18} fill={inWishlist ? "#ef4444" : "none"} />
             </button>
           </div>
+
+          {/* Direct Buy Now Button */}
+          <button 
+            onClick={handleBuyNow} 
+            className="btn buy-now-btn"
+            disabled={product.isSoldOut}
+            style={{
+              width: "100%",
+              marginTop: "12px",
+              padding: "14px 20px",
+              fontSize: "15px",
+              fontWeight: "700",
+              backgroundColor: product.isSoldOut ? "#94a3b8" : "var(--accent-color, #c5a880)",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "var(--border-radius)",
+              cursor: product.isSoldOut ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              boxShadow: product.isSoldOut ? "none" : "0 4px 14px rgba(197, 168, 128, 0.35)",
+              transition: "all 0.2s ease"
+            }}
+          >
+            <Zap size={18} />
+            <span>{product.isSoldOut ? "غير متوفر حالياً" : "شراء الآن (إتمام الطلب مباشرة)"}</span>
+          </button>
 
           {/* Add-to-cart confirmation notification */}
           {notification && (

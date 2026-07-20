@@ -130,8 +130,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const getRouteFromHash = useCallback((): { view: ViewType; productId: string | null } => {
     const rawHash = window.location.hash.trim();
-    if (!rawHash || rawHash === "#" || rawHash === "#/" || rawHash === "#home" || rawHash === "#/home") {
-      return { view: "home", productId: null };
+    if (!rawHash || rawHash === "#" || rawHash === "#/") {
+      return { view: "shop", productId: null };
     }
 
     const cleanHash = rawHash.replace(/^#\/?/, "");
@@ -162,7 +162,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return { view: cleanHash as ViewType, productId: null };
     }
 
-    return { view: "home", productId: null };
+    return { view: "shop", productId: null };
   }, [products]);
 
   // Routing & URL Hash state
