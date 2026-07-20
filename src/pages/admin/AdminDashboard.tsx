@@ -195,8 +195,10 @@ export const AdminDashboard: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 15 * 1024 * 1024) {
-      alert("تنبيه: حجم الفيديو كبير جداً (أكثر من 15MB). يفضل رفع مقطع فيديو بحجم أقل من 10MB لضمان سرعة التحميل للعملاء.");
+    if (file.size > 8 * 1024 * 1024) {
+      alert("تنبيه مهم: حجم الفيديو أكبر من 8MB. لضمان مزامنة المنتج سحابياً وظهوره على جميع أجهزة العملاء فوراً، يرجى اختيار مقطع فيديو بحجم خفيف (أقل من 8MB - مقطع مدته 5 إلى 10 ثوانٍ).");
+      e.target.value = "";
+      return;
     }
 
     setIsVideoUploading(true);

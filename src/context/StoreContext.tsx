@@ -115,7 +115,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       }
     };
+    
     fetchCloud();
+
+    const handleFocus = () => fetchCloud();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
   const getHashFromRoute = useCallback((view: ViewType, productId?: string | null): string => {

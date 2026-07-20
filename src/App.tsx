@@ -105,15 +105,18 @@ const MainAppContent: React.FC = () => {
 };
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { LanguageProvider } from "./context/LanguageContext";
 
 function App() {
   return (
     <ErrorBoundary>
-      <StoreProvider>
-        <CartProvider>
-          <MainAppContent />
-        </CartProvider>
-      </StoreProvider>
+      <LanguageProvider>
+        <StoreProvider>
+          <CartProvider>
+            <MainAppContent />
+          </CartProvider>
+        </StoreProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   );
 }

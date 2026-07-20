@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useStore } from "../context/StoreContext";
 import type { ViewType } from "../context/StoreContext";
 import { useCart } from "../context/CartContext";
+import { useLanguage, LANGUAGES } from "../context/LanguageContext";
 import { getCartItemPrice } from "../utils/price";
-import { ShoppingBag, Heart, Search, Menu, X, Plus, Minus, Trash2, Settings } from "lucide-react";
+import { ShoppingBag, Heart, Search, Menu, X, Plus, Minus, Trash2, Settings, Globe } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const {
@@ -24,9 +25,14 @@ export const Navbar: React.FC = () => {
     cartCount
   } = useCart();
 
+  const { language, setLanguage, t } = useLanguage();
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+
+  const activeLang = LANGUAGES.find((l) => l.code === language) || LANGUAGES[0];
 
   const navigateTo = (view: ViewType) => {
     setCurrentView(view);
@@ -40,6 +46,83 @@ export const Navbar: React.FC = () => {
   };
 
   const layoutStyle = theme.layoutStyle || "luxury";
+
+  const renderLanguageSwitcher = () => (
+    <div style={{ position: "relative" }}>
+      <button
+        onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+        className="btn-icon"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          padding: "4px 10px",
+          width: "auto",
+          height: "36px",
+          borderRadius: "18px",
+          fontSize: "12px",
+          fontWeight: "600",
+          backgroundColor: "rgba(0,0,0,0.03)",
+          border: "1px solid var(--border-color)",
+          cursor: "pointer"
+        }}
+        title="تغيير اللغة / Change Language"
+      >
+        <Globe size={15} />
+        <span>{activeLang.flag} {activeLang.code.toUpperCase()}</span>
+      </button>
+
+      {isLangMenuOpen && (
+        <div
+          className="animate-fade-in"
+          style={{
+            position: "absolute",
+            top: "100%",
+            marginTop: "6px",
+            insetInlineEnd: 0,
+            backgroundColor: "#ffffff",
+            border: "1px solid var(--border-color)",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.12)",
+            padding: "6px",
+            zIndex: 1000,
+            minWidth: "140px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px"
+          }}
+        >
+          {LANGUAGES.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => {
+                setLanguage(lang.code);
+                setIsLangMenuOpen(false);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "8px 12px",
+                borderRadius: "8px",
+                border: "none",
+                backgroundColor: language === lang.code ? "var(--accent-alpha-10, #f5efe6)" : "transparent",
+                color: language === lang.code ? "var(--primary-color)" : "var(--text-color)",
+                fontWeight: language === lang.code ? "700" : "500",
+                fontSize: "13px",
+                cursor: "pointer",
+                textAlign: "start",
+                width: "100%"
+              }}
+            >
+              <span>{lang.flag}</span>
+              <span>{lang.nativeName}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -74,7 +157,7 @@ export const Navbar: React.FC = () => {
             <>
               {/* Top Row: Actions (Left) | Logo (Center) | Icons & Mobile (Right) */}
               <div style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between" }}>
-                {/* Logo (Center - Pushed right in RTL menu design) */}
+                {/* Logo */}
                 <a href="#home" onClick={() => navigateTo("home")} className="logo-link" style={{ flex: "none", display: "flex", alignItems: "center", gap: "10px" }}>
                   {theme.logo ? (
                     <img src={theme.logo} alt={storeInfo.seo.title} className="logo-img" style={{ height: "45px" }} />
@@ -85,18 +168,20 @@ export const Navbar: React.FC = () => {
 
                 {/* Right side Actions */}
                 <div className="nav-actions" style={{ flex: "none" }}>
-                  <button onClick={() => setIsSearchOpen(true)} className="btn-icon">
+                  {renderLanguageSwitcher()}
+
+                  <button onClick={() => setIsSearchOpen(true)} className="btn-icon" title={t("nav_search")}>
                     <Search size={18} />
                   </button>
-                  <button onClick={() => navigateTo("shop")} className="btn-icon action-btn-badge">
+                  <button onClick={() => navigateTo("shop")} className="btn-icon action-btn-badge" title={t("nav_wishlist")}>
                     <Heart size={18} />
                     {wishlist.length > 0 && <span className="badge-count">{wishlist.length}</span>}
                   </button>
-                  <button onClick={() => setIsCartOpen(true)} className="btn-icon action-btn-badge cart-nav-btn" style={{ borderColor: cartCount > 0 ? "var(--accent-color)" : "var(--border-color)" }}>
+                  <button onClick={() => setIsCartOpen(true)} className="btn-icon action-btn-badge cart-nav-btn" style={{ borderColor: cartCount > 0 ? "var(--accent-color)" : "var(--border-color)" }} title={t("nav_cart")}>
                     <ShoppingBag size={18} />
                     {cartCount > 0 && <span className="badge-count" style={{ backgroundColor: "var(--accent-color)" }}>{cartCount}</span>}
                   </button>
-                  <button onClick={() => navigateTo("admin")} className="btn-icon" style={{ backgroundColor: "var(--primary-color)", color: "#ffffff" }}>
+                  <button onClick={() => navigateTo("admin")} className="btn-icon" style={{ backgroundColor: "var(--primary-color)", color: "#ffffff" }} title={t("nav_admin")}>
                     <Settings size={18} />
                   </button>
                   <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="btn-icon mobile-menu-btn">
@@ -117,22 +202,22 @@ export const Navbar: React.FC = () => {
               }}>
                 <li>
                   <a href="#home" onClick={() => navigateTo("home")} className={`nav-link ${currentView === "home" ? "active" : ""}`}>
-                    الرئيسية
+                    {t("nav_home")}
                   </a>
                 </li>
                 <li>
                   <a href="#shop" onClick={() => navigateTo("shop")} className={`nav-link ${currentView === "shop" ? "active" : ""}`}>
-                    المتجر
+                    {t("nav_shop")}
                   </a>
                 </li>
                 <li>
                   <a href="#about" onClick={() => navigateTo("about")} className={`nav-link ${currentView === "about" ? "active" : ""}`}>
-                    قصتنا
+                    {t("nav_about")}
                   </a>
                 </li>
                 <li>
                   <a href="#contact" onClick={() => navigateTo("contact")} className={`nav-link ${currentView === "contact" ? "active" : ""}`}>
-                    اتصل بنا
+                    {t("nav_contact")}
                   </a>
                 </li>
               </ul>
@@ -169,43 +254,45 @@ export const Navbar: React.FC = () => {
               >
                 <li>
                   <a href="#home" onClick={() => navigateTo("home")} className={`nav-link ${currentView === "home" ? "active" : ""}`}>
-                    الرئيسية
+                    {t("nav_home")}
                   </a>
                 </li>
                 <li>
                   <a href="#shop" onClick={() => navigateTo("shop")} className={`nav-link ${currentView === "shop" ? "active" : ""}`}>
-                    المتجر
+                    {t("nav_shop")}
                   </a>
                 </li>
                 <li>
                   <a href="#about" onClick={() => navigateTo("about")} className={`nav-link ${currentView === "about" ? "active" : ""}`}>
-                    قصتنا
+                    {t("nav_about")}
                   </a>
                 </li>
                 <li>
                   <a href="#contact" onClick={() => navigateTo("contact")} className={`nav-link ${currentView === "contact" ? "active" : ""}`}>
-                    اتصل بنا
+                    {t("nav_contact")}
                   </a>
                 </li>
               </ul>
 
               {/* Action Icons */}
               <div className="nav-actions" style={{ flex: layoutStyle === "modern" ? "0 0 auto" : "1" }}>
-                <button onClick={() => setIsSearchOpen(true)} className="btn-icon">
+                {renderLanguageSwitcher()}
+
+                <button onClick={() => setIsSearchOpen(true)} className="btn-icon" title={t("nav_search")}>
                   <Search size={18} />
                 </button>
 
-                <button onClick={() => navigateTo("shop")} className="btn-icon action-btn-badge">
+                <button onClick={() => navigateTo("shop")} className="btn-icon action-btn-badge" title={t("nav_wishlist")}>
                   <Heart size={18} />
                   {wishlist.length > 0 && <span className="badge-count">{wishlist.length}</span>}
                 </button>
 
-                <button onClick={() => setIsCartOpen(true)} className="btn-icon action-btn-badge cart-nav-btn" style={{ borderColor: cartCount > 0 ? "var(--accent-color)" : "var(--border-color)" }}>
+                <button onClick={() => setIsCartOpen(true)} className="btn-icon action-btn-badge cart-nav-btn" style={{ borderColor: cartCount > 0 ? "var(--accent-color)" : "var(--border-color)" }} title={t("nav_cart")}>
                   <ShoppingBag size={18} />
                   {cartCount > 0 && <span className="badge-count" style={{ backgroundColor: "var(--accent-color)" }}>{cartCount}</span>}
                 </button>
 
-                <button onClick={() => navigateTo("admin")} className="btn-icon" style={{ backgroundColor: "var(--primary-color)", color: "#ffffff" }}>
+                <button onClick={() => navigateTo("admin")} className="btn-icon" style={{ backgroundColor: "var(--primary-color)", color: "#ffffff" }} title={t("nav_admin")}>
                   <Settings size={18} />
                 </button>
 
@@ -238,11 +325,45 @@ export const Navbar: React.FC = () => {
             }}
           >
             <div className="drawer-header">
-              <span className="drawer-title">قائمة التنقل</span>
+              <span className="drawer-title">{t("nav_menu")}</span>
               <button onClick={() => setIsMobileMenuOpen(false)}>
                 <X size={20} />
               </button>
             </div>
+
+            {/* Mobile Language Switcher Selector */}
+            <div style={{ marginTop: "15px", paddingBottom: "15px", borderBottom: "1px solid var(--border-color)" }}>
+              <span style={{ fontSize: "12px", color: "var(--secondary-color)", display: "block", marginBottom: "8px", fontWeight: "600" }}>
+                Language / اللغة:
+              </span>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "8px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--border-color)",
+                      backgroundColor: language === lang.code ? "var(--primary-color)" : "#ffffff",
+                      color: language === lang.code ? "#ffffff" : "var(--text-color)",
+                      fontWeight: language === lang.code ? "700" : "500",
+                      fontSize: "12px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <span>{lang.flag}</span>
+                    <span>{lang.nativeName}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "20px", marginTop: "20px" }}>
               <li>
                 <a
@@ -250,7 +371,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => navigateTo("home")}
                   style={{ display: "block", fontSize: "16px", fontWeight: "600" }}
                 >
-                  الرئيسية
+                  {t("nav_home")}
                 </a>
               </li>
               <li>
@@ -259,7 +380,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => navigateTo("shop")}
                   style={{ display: "block", fontSize: "16px", fontWeight: "600" }}
                 >
-                  المتجر
+                  {t("nav_shop")}
                 </a>
               </li>
               <li>
@@ -268,7 +389,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => navigateTo("about")}
                   style={{ display: "block", fontSize: "16px", fontWeight: "600" }}
                 >
-                  قصتنا
+                  {t("nav_about")}
                 </a>
               </li>
               <li>
@@ -277,101 +398,29 @@ export const Navbar: React.FC = () => {
                   onClick={() => navigateTo("contact")}
                   style={{ display: "block", fontSize: "16px", fontWeight: "600" }}
                 >
-                  اتصل بنا
+                  {t("nav_contact")}
                 </a>
               </li>
-              
-              <li style={{ borderTop: "1px solid var(--border-color)", margin: "10px 0" }}></li>
-              
               <li>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    setIsSearchOpen(true);
-                  }}
-                  style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "15px", fontWeight: "600", color: "var(--primary-color)", background: "none", border: "none", padding: 0, cursor: "pointer", width: "100%", textAlign: "right" }}
+                <a
+                  href="#admin"
+                  onClick={() => navigateTo("admin")}
+                  style={{ display: "block", fontSize: "16px", fontWeight: "600", color: "var(--accent-color)" }}
                 >
-                  <Search size={18} style={{ color: "var(--accent-color)" }} />
-                  <span>البحث في المتجر</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    navigateTo("shop");
-                  }}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "15px", fontWeight: "600", color: "var(--primary-color)", background: "none", border: "none", padding: 0, cursor: "pointer", width: "100%", textAlign: "right" }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <Heart size={18} style={{ color: "var(--accent-color)" }} />
-                    <span>قائمة المفضلة</span>
-                  </div>
-                  {wishlist.length > 0 && (
-                    <span style={{ backgroundColor: "var(--primary-color)", color: "var(--bg-color)", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "10px", marginRight: "auto" }}>
-                      {wishlist.length}
-                    </span>
-                  )}
-                </button>
-              </li>
-
-              <li>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    navigateTo("admin");
-                  }}
-                  style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "15px", fontWeight: "600", color: "var(--primary-color)", background: "none", border: "none", padding: 0, cursor: "pointer", width: "100%", textAlign: "right" }}
-                >
-                  <Settings size={18} style={{ color: "var(--accent-color)" }} />
-                  <span>لوحة التحكم (الإدارة)</span>
-                </button>
+                  {t("nav_admin")}
+                </a>
               </li>
             </ul>
           </div>
         </div>
       )}
 
-      {/* Global Search Modal Overlay */}
-      {isSearchOpen && (
-        <div className="search-modal-backdrop" onClick={() => setIsSearchOpen(false)}>
-          <div className="search-modal" onClick={(e) => e.stopPropagation()}>
-            <form onSubmit={handleSearchSubmit} className="search-input-wrapper">
-              <input
-                type="text"
-                placeholder="ابحث عن المنتجات بالاسم أو الوصف..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-box-input"
-                autoFocus
-              />
-              <button type="submit" className="btn btn-primary" style={{ padding: "8px 20px" }}>
-                بحث
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setIsSearchOpen(false);
-                }}
-                style={{ marginRight: "12px", marginLeft: "12px", color: "var(--secondary-color)" }}
-              >
-                <X size={20} />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Cart Drawer Slide-out Panel */}
+      {/* Cart Drawer */}
       {isCartOpen && (
         <div className="cart-drawer-backdrop" onClick={() => setIsCartOpen(false)}>
           <div className="cart-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header">
-              <span className="drawer-title">سلة المشتريات ({cartCount})</span>
+              <span className="drawer-title">{t("cart_title")} ({cartCount})</span>
               <button onClick={() => setIsCartOpen(false)}>
                 <X size={20} />
               </button>
@@ -381,7 +430,7 @@ export const Navbar: React.FC = () => {
               {cart.length === 0 ? (
                 <div className="flex-center" style={{ flexDirection: "column", height: "100%", gap: "12px", color: "var(--secondary-color)" }}>
                   <ShoppingBag size={48} strokeWidth={1} />
-                  <span>سلة مشترياتك فارغة تماماً.</span>
+                  <span>{t("cart_empty")}</span>
                   <button
                     onClick={() => {
                       setIsCartOpen(false);
@@ -390,7 +439,7 @@ export const Navbar: React.FC = () => {
                     className="btn btn-secondary"
                     style={{ fontSize: "12px", padding: "8px 16px", marginTop: "10px" }}
                   >
-                    اذهب للمتجر
+                    {t("cart_go_shop")}
                   </button>
                 </div>
               ) : (
@@ -439,7 +488,7 @@ export const Navbar: React.FC = () => {
                         <button
                           onClick={() => removeFromCart(item.uniqueKey)}
                           className="drawer-item-remove"
-                          title="Remove item"
+                          title={t("cart_remove")}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -452,10 +501,10 @@ export const Navbar: React.FC = () => {
 
             {cart.length > 0 && (
               <div className="drawer-footer animate-fade-in">
-                 <div className="drawer-subtotal">
-                   <span>المجموع الفرعي:</span>
-                   <span>{cartTotal.toFixed(2)} EGP</span>
-                 </div>
+                <div className="drawer-subtotal">
+                  <span>{t("cart_subtotal")}</span>
+                  <span>{cartTotal.toFixed(2)} EGP</span>
+                </div>
                 <div className="drawer-buttons">
                   <button
                     onClick={() => {
@@ -465,7 +514,7 @@ export const Navbar: React.FC = () => {
                     className="btn btn-secondary"
                     style={{ width: "100%" }}
                   >
-                    عرض سلة المشتريات
+                    {t("cart_view_cart")}
                   </button>
                   <button
                     onClick={() => {
@@ -475,11 +524,59 @@ export const Navbar: React.FC = () => {
                     className="btn btn-primary"
                     style={{ width: "100%" }}
                   >
-                    إتمام الطلب
+                    {t("cart_checkout")}
                   </button>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Global Search Overlay Modal */}
+      {isSearchOpen && (
+        <div
+          className="cart-drawer-backdrop flex-center animate-fade-in"
+          onClick={() => setIsSearchOpen(false)}
+          style={{ zIndex: 300, backgroundColor: "rgba(15, 23, 42, 0.75)", backdropFilter: "blur(6px)" }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#ffffff",
+              padding: "30px",
+              borderRadius: "var(--border-radius)",
+              width: "90%",
+              maxWidth: "600px",
+              boxShadow: "var(--shadow-lg)"
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "700" }}>{t("nav_search")}</h3>
+              <button onClick={() => setIsSearchOpen(false)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSearchSubmit} style={{ display: "flex", gap: "10px" }}>
+              <input
+                type="text"
+                placeholder={t("shop_search_placeholder")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  borderRadius: "var(--border-radius)",
+                  border: "1px solid var(--border-color)",
+                  outline: "none",
+                  fontSize: "14px"
+                }}
+                autoFocus
+              />
+              <button type="submit" className="btn btn-primary" style={{ padding: "0 24px" }}>
+                <Search size={16} />
+              </button>
+            </form>
           </div>
         </div>
       )}

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useStore } from "../context/StoreContext";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
 import { Star, Heart, ShoppingCart, ArrowLeft, Zap, Video } from "lucide-react";
 import { getAdjustedPrice } from "../utils/price";
 
 export const ProductDetails: React.FC = () => {
   const { selectedProductId, products, categories, setCurrentView, setActiveCategorySlug } = useStore();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { t } = useLanguage();
 
   const product = products.find((p) => p.id === selectedProductId);
 
@@ -80,7 +82,7 @@ export const ProductDetails: React.FC = () => {
     }
 
     addToCart(product, quantity, selectedAttrs);
-    setNotification("✓ تم إضافة المنتج إلى السلة بنجاح!");
+    setNotification(t("product_added_msg"));
     setTimeout(() => setNotification(null), 4000);
   };
 
@@ -88,7 +90,7 @@ export const ProductDetails: React.FC = () => {
     if (product.isSoldOut) return;
     const missing = prodAttributes.filter((attr) => attr.name && !selectedAttrs[attr.name]);
     if (missing.length > 0) {
-      alert(`يرجى اختيار الخيارات لـ: ${missing.map((m) => m.name).join(", ")}`);
+      alert(`${t("product_select_required")}: ${missing.map((m) => m.name).join(", ")}`);
       return;
     }
 
@@ -114,8 +116,8 @@ export const ProductDetails: React.FC = () => {
         className="flex-center"
         style={{ gap: "6px", color: "var(--secondary-color)", fontSize: "14px", marginBottom: "30px", background: "none", border: "none", cursor: "pointer" }}
       >
-        <ArrowLeft size={16} style={{ marginLeft: "6px" }} />
-        <span>العودة للمتجر</span>
+        <ArrowLeft size={16} style={{ marginInlineEnd: "6px" }} />
+        <span>{t("product_back_to_shop")}</span>
       </button>
 
       {/* Main Details Wrapper */}
@@ -284,8 +286,8 @@ export const ProductDetails: React.FC = () => {
                 cursor: product.isSoldOut ? "not-allowed" : "pointer"
               }}
             >
-              <ShoppingCart size={16} style={{ marginLeft: "6px" }} />
-              <span>{product.isSoldOut ? "نفذت الكمية" : "إضافة للسلة"}</span>
+              <ShoppingCart size={16} style={{ marginInlineEnd: "6px" }} />
+              <span>{product.isSoldOut ? t("product_sold_out") : t("product_add_to_cart")}</span>
             </button>
 
             <button
@@ -297,7 +299,7 @@ export const ProductDetails: React.FC = () => {
                 color: inWishlist ? "#ef4444" : "var(--primary-color)",
                 borderColor: inWishlist ? "#ef4444" : "var(--primary-color)"
               }}
-              title={inWishlist ? "حذف من المفضلة" : "إضافة للمفضلة"}
+              title={inWishlist ? t("cart_remove") : t("nav_wishlist")}
             >
               <Heart size={18} fill={inWishlist ? "#ef4444" : "none"} />
             </button>
@@ -328,7 +330,7 @@ export const ProductDetails: React.FC = () => {
             }}
           >
             <Zap size={18} />
-            <span>{product.isSoldOut ? "غير متوفر حالياً" : "شراء الآن (إتمام الطلب مباشرة)"}</span>
+            <span>{product.isSoldOut ? t("product_out_of_stock") : t("product_buy_now")}</span>
           </button>
 
           {/* Add-to-cart confirmation notification */}

@@ -1,10 +1,12 @@
 import React from "react";
 import { useStore } from "../context/StoreContext";
 import type { ViewType } from "../context/StoreContext";
+import { useLanguage } from "../context/LanguageContext";
 import { MessageSquare, Phone, Mail, MapPin } from "lucide-react";
 
 export const Footer: React.FC = () => {
   const { storeInfo, setCurrentView } = useStore();
+  const { t } = useLanguage();
 
   const navigateTo = (view: ViewType) => {
     setCurrentView(view);
@@ -77,21 +79,21 @@ export const Footer: React.FC = () => {
 
           {/* Quick links widget */}
           <div>
-            <h4 className="footer-widget-title">روابط سريعة</h4>
+            <h4 className="footer-widget-title">{t("footer_quick_links")}</h4>
             <ul className="footer-links">
               <li className="footer-link-item">
                 <a href="#shop" onClick={() => navigateTo("shop")} className="footer-link">
-                  تصفح المنتجات
+                  {t("nav_shop")}
                 </a>
               </li>
               <li className="footer-link-item">
                 <a href="#about" onClick={() => navigateTo("about")} className="footer-link">
-                  تراثنا وقصتنا
+                  {t("nav_about")}
                 </a>
               </li>
               <li className="footer-link-item">
                 <a href="#contact" onClick={() => navigateTo("contact")} className="footer-link">
-                  تواصل معنا
+                  {t("nav_contact")}
                 </a>
               </li>
             </ul>
@@ -99,21 +101,21 @@ export const Footer: React.FC = () => {
 
           {/* Legal links widget */}
           <div>
-            <h4 className="footer-widget-title">تفاصيل قانونية</h4>
+            <h4 className="footer-widget-title">{t("footer_legal")}</h4>
             <ul className="footer-links">
               <li className="footer-link-item">
                 <a href="#faq" onClick={() => navigateTo("faq")} className="footer-link">
-                  الأسئلة الشائعة والطلب
+                  FAQ
                 </a>
               </li>
               <li className="footer-link-item">
                 <a href="#privacy" onClick={() => navigateTo("privacy")} className="footer-link">
-                  سياسة الخصوصية
+                  Privacy Policy
                 </a>
               </li>
               <li className="footer-link-item">
                 <a href="#terms" onClick={() => navigateTo("terms")} className="footer-link">
-                  الشروط والأحكام
+                  Terms & Conditions
                 </a>
               </li>
             </ul>
@@ -121,7 +123,7 @@ export const Footer: React.FC = () => {
 
           {/* Contact Details Widget */}
           <div>
-            <h4 className="footer-widget-title">عنوان المتجر</h4>
+            <h4 className="footer-widget-title">{t("footer_contact_info")}</h4>
             <ul className="footer-links" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {storeInfo.address && (
                 <li style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "14px" }}>
@@ -148,10 +150,10 @@ export const Footer: React.FC = () => {
         {/* Bottom footer text */}
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} {storeInfo.seo.title.split("|")[0].trim()}. جميع الحقوق محفوظة.
+            © {new Date().getFullYear()} {storeInfo.seo.title.split("|")[0].trim()}. {t("footer_rights")}.
           </span>
           <span style={{ opacity: "0.6" }}>
-            صنع بحب لتجربة تسوق راقية ومميزة.
+            {t("footer_made_with")}
           </span>
         </div>
       </div>

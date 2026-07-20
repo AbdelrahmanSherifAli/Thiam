@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useStore } from "../context/StoreContext";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
 import { ProductCard } from "../components/ProductCard";
 import { Filter, RotateCcw, Heart, Search, X, SlidersHorizontal } from "lucide-react";
 
@@ -15,6 +16,7 @@ export const Shop: React.FC = () => {
   } = useStore();
 
   const { wishlist } = useCart();
+  const { t } = useLanguage();
   
   const [showWishlistOnly, setShowWishlistOnly] = useState(false);
   const [maxPrice, setMaxPrice] = useState<number>(2000);
@@ -69,8 +71,8 @@ export const Shop: React.FC = () => {
           onClick={() => setActiveCategorySlug(null)}
           className={`category-pill ${activeCategorySlug === null ? "active" : ""}`}
         >
-          <span>جميع المنتجات</span>
-          <span style={{ opacity: 0.8, fontSize: "11px", marginRight: "4px" }}>({products.length})</span>
+          <span>{t("shop_all_categories")}</span>
+          <span style={{ opacity: 0.8, fontSize: "11px", marginInlineStart: "4px" }}>({products.length})</span>
         </button>
         {categories.map((cat) => {
           const count = products.filter((p) => p.categoryId === cat.id).length;
@@ -81,7 +83,7 @@ export const Shop: React.FC = () => {
               className={`category-pill ${activeCategorySlug === cat.slug ? "active" : ""}`}
             >
               <span>{cat.name}</span>
-              <span style={{ opacity: 0.8, fontSize: "11px", marginRight: "4px" }}>({count})</span>
+              <span style={{ opacity: 0.8, fontSize: "11px", marginInlineStart: "4px" }}>({count})</span>
             </button>
           );
         })}
@@ -94,7 +96,7 @@ export const Shop: React.FC = () => {
           className="btn btn-secondary mobile-filter-toggle-btn"
         >
           <SlidersHorizontal size={16} />
-          <span>تصفية وتصفح المنتجات</span>
+          <span>{t("shop_filter_btn")}</span>
           {(searchQuery || showWishlistOnly || maxPrice < 2000) && (
             <span className="filter-active-dot" />
           )}
@@ -105,7 +107,7 @@ export const Shop: React.FC = () => {
         {/* Sidebar Filters (Desktop & Collapsible Mobile Drawer) */}
         <aside className={`shop-sidebar ${isMobileFilterOpen ? "mobile-open" : ""}`}>
           <div className="mobile-sidebar-header">
-            <h3>خيارات التصفية</h3>
+            <h3>{t("shop_filter_btn")}</h3>
             <button onClick={() => setIsMobileFilterOpen(false)} className="close-mobile-filter">
               <X size={20} />
             </button>
@@ -113,30 +115,30 @@ export const Shop: React.FC = () => {
 
           {/* Search Widget */}
           <div className="sidebar-widget">
-            <h3 className="widget-title">البحث</h3>
+            <h3 className="widget-title">{t("shop_search_widget")}</h3>
             <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
               <input
                 type="text"
-                placeholder="ابحث عن منتج..."
+                placeholder={t("shop_search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="form-input"
-                style={{ paddingRight: "12px", paddingLeft: "40px", height: "42px" }}
+                style={{ paddingInlineStart: "12px", paddingInlineEnd: "40px", height: "42px" }}
               />
-              <Search size={16} style={{ position: "absolute", left: "12px", color: "var(--secondary-color)" }} />
+              <Search size={16} style={{ position: "absolute", insetInlineEnd: "12px", color: "var(--secondary-color)" }} />
             </div>
           </div>
 
           {/* Categories Widget */}
           <div className="sidebar-widget desktop-only-widget">
-            <h3 className="widget-title">الأقسام</h3>
+            <h3 className="widget-title">{t("shop_categories")}</h3>
             <ul className="category-list">
               <li className="category-item">
                 <button
                   onClick={() => setActiveCategorySlug(null)}
                   className={`category-filter-btn ${activeCategorySlug === null ? "active" : ""}`}
                 >
-                  <span>جميع المنتجات</span>
+                  <span>{t("shop_all_categories")}</span>
                   <span>({products.length})</span>
                 </button>
               </li>
@@ -159,7 +161,7 @@ export const Shop: React.FC = () => {
 
           {/* Price Filter Widget */}
           <div className="sidebar-widget">
-            <h3 className="widget-title">السعر الأقصى</h3>
+            <h3 className="widget-title">{t("shop_price_max")}</h3>
             <div style={{ marginTop: "10px" }}>
               <input
                 type="range"
@@ -191,8 +193,8 @@ export const Shop: React.FC = () => {
                 color: showWishlistOnly ? "#ef4444" : "var(--primary-color)"
               }}
             >
-              <Heart size={14} fill={showWishlistOnly ? "#ef4444" : "none"} style={{ marginLeft: "6px" }} />
-              <span>{showWishlistOnly ? "عرض جميع المنتجات" : "عرض المفضلة فقط"}</span>
+              <Heart size={14} fill={showWishlistOnly ? "#ef4444" : "none"} style={{ marginInlineEnd: "6px" }} />
+              <span>{showWishlistOnly ? t("shop_show_all") : t("shop_wishlist_only")}</span>
             </button>
 
             <button
@@ -207,8 +209,8 @@ export const Shop: React.FC = () => {
                 borderColor: "var(--border-color)"
               }}
             >
-              <RotateCcw size={14} style={{ marginLeft: "6px" }} />
-              <span>إعادة تعيين الفلاتر</span>
+              <RotateCcw size={14} style={{ marginInlineEnd: "6px" }} />
+              <span>{t("shop_reset_filters")}</span>
             </button>
           </div>
         </aside>
@@ -219,16 +221,16 @@ export const Shop: React.FC = () => {
           <div className="shop-main-header">
             <div>
               <h2 style={{ fontSize: "22px", color: "var(--primary-color)", margin: 0 }}>
-                {showWishlistOnly ? "قائمة مفضلاتي" : activeCategorySlug ? categories.find(c => c.slug === activeCategorySlug)?.name : "استكشف جميع المنتجات"}
+                {showWishlistOnly ? t("nav_wishlist") : activeCategorySlug ? categories.find(c => c.slug === activeCategorySlug)?.name : t("shop_title")}
               </h2>
               {searchQuery && (
                 <p className="results-count" style={{ marginTop: "4px", margin: 0 }}>
-                  البحث عن: "<strong>{searchQuery}</strong>"
+                  {t("shop_search_widget")}: "<strong>{searchQuery}</strong>"
                 </p>
               )}
             </div>
             <div className="results-count">
-              عرض {filteredProducts.length} نتائج
+              {t("shop_results_count")} ({filteredProducts.length})
             </div>
           </div>
 
@@ -247,12 +249,12 @@ export const Shop: React.FC = () => {
               }}
             >
               <Filter size={40} strokeWidth={1} style={{ color: "var(--secondary-color)" }} />
-              <h3 style={{ fontSize: "18px", margin: 0 }}>لم يتم العثور على منتجات</h3>
+              <h3 style={{ fontSize: "18px", margin: 0 }}>{t("shop_no_products")}</h3>
               <p style={{ color: "var(--secondary-color)", fontSize: "13px", textAlign: "center", maxWidth: "400px", margin: 0 }}>
-                لم نتمكن من العثور على أي منتج يطابق خيارات الفرز المحددة. جرب إعادة تعيين الفلاتر أو تغيير كلمة البحث.
+                {t("shop_no_products_desc")}
               </p>
               <button onClick={handleResetFilters} className="btn btn-primary" style={{ padding: "8px 20px" }}>
-                مسح الفلاتر
+                {t("shop_reset_filters")}
               </button>
             </div>
           ) : (

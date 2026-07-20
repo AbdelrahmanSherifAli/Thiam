@@ -2,6 +2,7 @@ import React from "react";
 import type { Product } from "../services/storageService";
 import { useStore } from "../context/StoreContext";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
 import { Star, Heart, Eye, Video } from "lucide-react";
 
 interface ProductCardProps {
@@ -11,6 +12,7 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { setCurrentView, setSelectedProductId, theme } = useStore();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { t } = useLanguage();
 
   const handleCardClick = () => {
     setSelectedProductId(product.id);
@@ -283,17 +285,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="card-badges">
           {product.videoUrl && (
             <span className="badge" style={{ backgroundColor: "#0f172a", color: "#ffffff", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <Video size={10} /> فيديو
+              <Video size={10} /> {t("product_video_badge")}
             </span>
           )}
           {product.isSoldOut && (
-            <span className="badge" style={{ backgroundColor: "#ef4444", color: "#ffffff" }}>نفذت الكمية</span>
+            <span className="badge" style={{ backgroundColor: "#ef4444", color: "#ffffff" }}>{t("product_sold_out")}</span>
           )}
           {hasDiscount && !product.isSoldOut && (
-            <span className="badge badge-accent">خصم {discountPercent}%</span>
+            <span className="badge badge-accent">{t("product_discount")} {discountPercent}%</span>
           )}
           {product.featured && (
-            <span className="badge badge-primary">مميز</span>
+            <span className="badge badge-primary">{t("product_featured")}</span>
           )}
         </div>
 
