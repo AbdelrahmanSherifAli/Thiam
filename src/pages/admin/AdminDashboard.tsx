@@ -211,23 +211,24 @@ export const AdminDashboard: React.FC = () => {
 
   const openEditProduct = (prod: Product) => {
     setEditingProduct(prod);
-    setProdName(prod.name);
+    setProdName(prod.name || "");
     setProdCode(prod.code || "");
-    setProdPrice(prod.price);
+    setProdPrice(prod.price || 0);
     setProdOriginalPrice(prod.originalPrice ? prod.originalPrice.toString() : "");
-    setProdDesc(prod.description);
-    setProdImagesList(prod.images);
+    setProdDesc(prod.description || "");
+    setProdImagesList(Array.isArray(prod.images) ? prod.images : []);
     setManualImageUrl("");
-    setProdCategoryId(prod.categoryId);
-    setProdFeatured(prod.featured);
+    setProdCategoryId(prod.categoryId || "");
+    setProdFeatured(!!prod.featured);
     setProdIsSoldOut(!!prod.isSoldOut);
-    setProdRating(prod.rating);
-    setProdReviews(prod.reviewsCount);
-    // Convert attributes format directly as arrays
+    setProdRating(prod.rating || 5);
+    setProdReviews(prod.reviewsCount || 0);
+    
+    const attrs = Array.isArray(prod.attributes) ? prod.attributes : [];
     setProdAttrs(
-      prod.attributes.map((attr) => ({
-        name: attr.name,
-        options: attr.options,
+      attrs.map((attr) => ({
+        name: attr.name || "",
+        options: Array.isArray(attr.options) ? attr.options : [],
         tempOption: ""
       }))
     );
@@ -1276,13 +1277,16 @@ export const AdminDashboard: React.FC = () => {
                 <tbody>
                   {products.map((prod) => {
                     const cat = categories.find((c) => c.id === prod.categoryId);
+                    const prodImg = prod.images && prod.images.length > 0 ? prod.images[0] : "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80";
+                    const prodPrice = typeof prod.price === "number" ? prod.price : 0;
+                    const prodAttributes = Array.isArray(prod.attributes) ? prod.attributes : [];
                     return (
                       <tr key={prod.id}>
                         <td>
-                          <img src={prod.images[0]} alt={prod.name} className="admin-table-img" />
+                          <img src={prodImg} alt={prod.name || "منتج"} className="admin-table-img" />
                         </td>
                         <td style={{ fontWeight: "600" }}>
-                          {prod.name}
+                          {prod.name || "منتج بدون اسم"}
                           {prod.code && (
                             <span style={{ fontSize: "11px", color: "#b45309", backgroundColor: "#fef3c7", padding: "1px 6px", borderRadius: "4px", marginRight: "6px" }}>
                               #{prod.code}
@@ -1290,11 +1294,11 @@ export const AdminDashboard: React.FC = () => {
                           )}
                         </td>
                         <td>{cat ? cat.name : "غير مصنف"}</td>
-                        <td style={{ fontWeight: "700" }}>{prod.price.toFixed(2)} EGP</td>
+                        <td style={{ fontWeight: "700" }}>{prodPrice.toFixed(2)} EGP</td>
                         <td>
-                          {prod.attributes.map((attr) => (
+                          {prodAttributes.map((attr) => (
                             <span
-                              key={attr.name}
+                              key={attr.name || Math.random()}
                               style={{
                                 display: "inline-block",
                                 fontSize: "11px",
@@ -1304,7 +1308,7 @@ export const AdminDashboard: React.FC = () => {
                                 margin: "2px"
                               }}
                             >
-                              {attr.name} ({attr.options.length})
+                              {attr.name} ({Array.isArray(attr.options) ? attr.options.length : 0})
                             </span>
                           ))}
                         </td>

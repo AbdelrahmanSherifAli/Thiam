@@ -104,13 +104,17 @@ const MainAppContent: React.FC = () => {
   );
 };
 
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
 function App() {
   return (
-    <StoreProvider>
-      <CartProvider>
-        <MainAppContent />
-      </CartProvider>
-    </StoreProvider>
+    <ErrorBoundary>
+      <StoreProvider>
+        <CartProvider>
+          <MainAppContent />
+        </CartProvider>
+      </StoreProvider>
+    </ErrorBoundary>
   );
 }
 
