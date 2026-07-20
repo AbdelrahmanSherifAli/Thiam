@@ -110,8 +110,7 @@ export const AdminDashboard: React.FC = () => {
         const url = await StorageService.uploadImageToCloud(file);
         return url;
       } catch (err: any) {
-        console.error("Cloud image upload failed, falling back to local compression:", err);
-        alert(`تنبيه: فشل الرفع السحابي للصورة (${err.message || err}). سنقوم بحفظها محلياً في متصفحك مؤقتاً.`);
+        console.warn("Cloud image upload failed or blocked by AdBlocker/Shields, falling back to compressed base64:", err);
       }
     }
 

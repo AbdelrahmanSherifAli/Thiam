@@ -617,11 +617,23 @@ export const StorageService = {
   async uploadImageToCloud(file: File): Promise<string> {
     const settings = this.getCloudSettings();
     if (!settings.imgbbApiKey) {
-      throw new Error("لم يتم تكوين مفتاح API لـ ImgBB. يرجى إعداده في التبويب السحابي لوحة التحكم.");
+      throw new Error("لم يتم تكوين مفتاح API لـ ImgBB.");
     }
 
+    // Convert file to Base64 string for ImgBB payload compatibility
+    const base64String = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.split(",")[1];
+        resolve(base64);
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", base64String);
 
     const response = await fetch(`https://api.imgbb.com/1/upload?key=${settings.imgbbApiKey.trim()}`, {
       method: "POST",
@@ -634,8 +646,8 @@ export const StorageService = {
     }
 
     const resData = await response.json();
-    if (resData && resData.data && resData.data.url) {
-      return resData.data.url;
+    if (resData && resData.data && (resData.data.url || resData.data.display_url)) {
+      return resData.data.display_url || resData.data.url;
     } else {
       throw new Error("فشل الحصول على رابط الصورة من ImgBB.");
     }

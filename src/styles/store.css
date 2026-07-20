@@ -458,6 +458,84 @@
   color: #ffffff;
 }
 
+/* Category Pills Horizontal Scrollbar */
+.category-pills-bar {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.category-pills-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-pill {
+  white-space: nowrap;
+  padding: 8px 18px;
+  border-radius: 25px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.category-pill:hover, .category-pill.active {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-filter-bar {
+  display: none;
+  margin-bottom: 20px;
+}
+
+.mobile-filter-toggle-btn {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+}
+
+.filter-active-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+}
+
+.mobile-sidebar-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.close-mobile-filter {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 4px;
+}
+
 /* 4. SHOP PAGE WITH SIDEBAR */
 .shop-page-wrapper {
   display: grid;
@@ -465,74 +543,94 @@
   gap: 40px;
 }
 
+.shop-sidebar {
+  border-left: 1px solid var(--border-color);
+  padding-left: 30px;
+  border-right: none;
+  padding-right: 0;
+}
+
 @media (max-width: 991px) {
+  .mobile-filter-bar {
+    display: block;
+  }
+  .desktop-only-widget {
+    display: none !important;
+  }
   .shop-page-wrapper {
     grid-template-columns: 1fr;
+    gap: 0;
   }
-}
-
-.shop-sidebar {
-  border-right: 1px solid var(--border-color);
-  padding-right: 30px;
-}
-
-@media (max-width: 991px) {
   .shop-sidebar {
-    border-right: none;
-    padding-right: 0;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    display: none;
+    border-left: none;
+    padding-left: 0;
+    margin-bottom: 25px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+  }
+  .shop-sidebar.mobile-open {
+    display: block !important;
+    animation: fadeIn 0.25s ease;
+  }
+  .mobile-sidebar-header {
+    display: flex;
   }
 }
 
 .sidebar-widget {
-  margin-bottom: 35px;
+  margin-bottom: 30px;
 }
 
 .widget-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 18px;
-  padding-bottom: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 6px;
   border-bottom: 2px solid var(--primary-color);
   display: inline-block;
 }
 
 .category-list {
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .category-item {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .category-filter-btn {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-color);
-  opacity: 0.8;
+  opacity: 0.85;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 6px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  box-sizing: border-box;
   transition: all var(--transition-fast);
 }
 
 .category-filter-btn:hover, .category-filter-btn.active {
   opacity: 1;
   color: var(--accent-color);
-  padding-left: 6px;
+  background-color: rgba(197, 168, 128, 0.12);
 }
 
 .shop-main-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 30px;
-  padding-bottom: 15px;
+  margin-bottom: 25px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
 }
 
