@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useStore } from "../context/StoreContext";
 import { useCart } from "../context/CartContext";
-import { Star, Heart, ShoppingCart, ArrowLeft, ShieldCheck, Truck, RefreshCw } from "lucide-react";
+import { Star, Heart, ShoppingCart, ArrowLeft } from "lucide-react";
 import { getAdjustedPrice } from "../utils/price";
 
 export const ProductDetails: React.FC = () => {
@@ -9,6 +9,16 @@ export const ProductDetails: React.FC = () => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
 
   const product = products.find((p) => p.id === selectedProductId);
+
+  // Fallback safe values for product fields
+  const prodImages = product && Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : ["https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80"];
+  
+  const prodAttributes = product && Array.isArray(product.attributes) ? product.attributes : [];
+  const prodRating = product && typeof product.rating === "number" && !isNaN(product.rating) ? product.rating : 5;
+  const prodReviewsCount = product && typeof product.reviewsCount === "number" ? product.reviewsCount : 0;
+  const prodPrice = product && typeof product.price === "number" ? product.price : 0;
 
   // Active image displaying in gallery
   const [activeImage, setActiveImage] = useState<string>("");
@@ -25,25 +35,25 @@ export const ProductDetails: React.FC = () => {
   // Seed default selections when product loads
   useEffect(() => {
     if (product) {
-      setActiveImage(product.images[0]);
+      setActiveImage(prodImages[0]);
       setQuantity(1);
       
       const defaults: Record<string, string> = {};
-      product.attributes.forEach((attr) => {
-        if (attr.options.length > 0) {
+      prodAttributes.forEach((attr) => {
+        if (attr && attr.name && Array.isArray(attr.options) && attr.options.length > 0) {
           defaults[attr.name] = attr.options[0];
         }
       });
       setSelectedAttrs(defaults);
     }
-  }, [product]);
+  }, [selectedProductId, product]);
 
   if (!product) {
     return (
       <div className="container section-padding flex-center" style={{ flexDirection: "column", gap: "20px" }}>
-        <h3>Fragrance Not Found</h3>
+        <h3 style={{ fontSize: "18px", color: "var(--primary-color)" }}>المنتج غير موجود</h3>
         <button onClick={() => setCurrentView("shop")} className="btn btn-primary">
-          Back to Shop Catalog
+          العودة لكتالوج المنتجات
         </button>
       </div>
     );
@@ -61,7 +71,7 @@ export const ProductDetails: React.FC = () => {
   const handleAddToCart = () => {
     if (product.isSoldOut) return;
     // Verify all attributes are selected
-    const missing = product.attributes.filter((attr) => !selectedAttrs[attr.name]);
+    const missing = prodAttributes.filter((attr) => attr.name && !selectedAttrs[attr.name]);
     if (missing.length > 0) {
       alert(`يرجى اختيار الخيارات لـ: ${missing.map((m) => m.name).join(", ")}`);
       return;
@@ -80,6 +90,7 @@ export const ProductDetails: React.FC = () => {
   };
 
   const inWishlist = isInWishlist(product.id);
+  const starsCount = Math.max(1, Math.min(5, Math.round(prodRating)));
 
   return (
     <div className="container section-padding">
@@ -87,7 +98,7 @@ export const ProductDetails: React.FC = () => {
       <button
         onClick={() => setCurrentView("shop")}
         className="flex-center"
-        style={{ gap: "6px", color: "var(--secondary-color)", fontSize: "14px", marginBottom: "30px" }}
+        style={{ gap: "6px", color: "var(--secondary-color)", fontSize: "14px", marginBottom: "30px", background: "none", border: "none", cursor: "pointer" }}
       >
         <ArrowLeft size={16} style={{ marginLeft: "6px" }} />
         <span>العودة للمتجر</span>
@@ -98,11 +109,11 @@ export const ProductDetails: React.FC = () => {
         {/* Left Column: Gallery */}
         <div className="gallery-container">
           <div className="gallery-main">
-            <img src={activeImage} alt={product.name} className="gallery-main-img" />
+            <img src={activeImage || prodImages[0]} alt={product.name || "منتج"} className="gallery-main-img" />
           </div>
-          {product.images.length > 1 && (
+          {prodImages.length > 1 && (
             <div className="gallery-thumbs">
-              {product.images.map((img, idx) => (
+              {prodImages.map((img, idx) => (
                 <div
                   key={idx}
                   onClick={() => setActiveImage(img)}
@@ -150,37 +161,37 @@ export const ProductDetails: React.FC = () => {
           {/* Rating */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#fbbf24", marginBottom: "20px" }}>
             <div style={{ display: "flex", gap: "2px" }}>
-              {Array.from({ length: Math.round(product.rating) }).map((_, i) => (
+              {Array.from({ length: starsCount }).map((_, i) => (
                 <Star key={i} size={15} fill="#fbbf24" stroke="#fbbf24" />
               ))}
             </div>
             <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--text-color)" }}>
-              {product.rating.toFixed(1)}
+              {prodRating.toFixed(1)}
             </span>
             <span style={{ fontSize: "13px", color: "var(--secondary-color)" }}>
-              ({product.reviewsCount} تقييمات العملاء)
+              ({prodReviewsCount} تقييمات العملاء)
             </span>
           </div>
 
           {/* Price */}
           <div className="details-price">
             <span>{getAdjustedPrice(product, selectedAttrs).toFixed(2)} EGP</span>
-            {product.originalPrice && product.originalPrice > product.price && (
+            {product.originalPrice && product.originalPrice > prodPrice && (
               <span className="original-price" style={{ fontSize: "20px" }}>
-                {(product.originalPrice + (getAdjustedPrice(product, selectedAttrs) - product.price)).toFixed(2)} EGP
+                {(product.originalPrice + (getAdjustedPrice(product, selectedAttrs) - prodPrice)).toFixed(2)} EGP
               </span>
             )}
           </div>
 
           {/* Long Description */}
-          <p className="details-desc">{product.description}</p>
+          <p className="details-desc">{product.description || "لا يوجد وصف متوفر لهذا المنتج حالياً."}</p>
 
-          {/* Dynamic Attributes Editor */}
-          {product.attributes.map((attr) => (
-            <div key={attr.name} className="attribute-selector">
+          {/* Dynamic Attributes Selector */}
+          {prodAttributes.map((attr) => (
+            <div key={attr.name || Math.random()} className="attribute-selector">
               <span className="attribute-label">اختر {attr.name}:</span>
               <div className="attribute-options">
-                {attr.options.map((opt) => (
+                {Array.isArray(attr.options) && attr.options.map((opt) => (
                   <button
                     key={opt}
                     onClick={() => handleAttrClick(attr.name, opt)}
@@ -250,44 +261,16 @@ export const ProductDetails: React.FC = () => {
                 backgroundColor: "var(--accent-alpha-10)",
                 color: "var(--primary-color)",
                 border: "1px solid var(--accent-color)",
-                borderRadius: "8px",
+                borderRadius: "var(--border-radius)",
                 padding: "12px 16px",
-                fontWeight: "600",
+                marginTop: "20px",
                 fontSize: "14px",
-                marginBottom: "30px"
+                fontWeight: "600"
               }}
             >
               {notification}
             </div>
           )}
-
-          {/* Trust badges */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "16px",
-              paddingTop: "24px",
-              borderTop: "1px solid var(--border-color)",
-              marginTop: "20px"
-            }}
-          >
-            <div style={{ textAlign: "center", fontSize: "12px" }}>
-              <Truck size={20} style={{ color: "var(--accent-color)", margin: "0 auto 8px" }} />
-              <div style={{ fontWeight: "600" }}>توصيل سريع</div>
-              <div style={{ color: "var(--secondary-color)", scale: "0.95" }}>شحن لجميع المحافظات</div>
-            </div>
-            <div style={{ textAlign: "center", fontSize: "12px" }}>
-              <ShieldCheck size={20} style={{ color: "var(--accent-color)", margin: "0 auto 8px" }} />
-              <div style={{ fontWeight: "600" }}>أصلي 100%</div>
-              <div style={{ color: "var(--secondary-color)", scale: "0.95" }}>استيراد مباشر</div>
-            </div>
-            <div style={{ textAlign: "center", fontSize: "12px" }}>
-              <RefreshCw size={20} style={{ color: "var(--accent-color)", margin: "0 auto 8px" }} />
-              <div style={{ fontWeight: "600" }}>دعم عبر واتس آب</div>
-              <div style={{ color: "var(--secondary-color)", scale: "0.95" }}>رد خلال ساعتين</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
