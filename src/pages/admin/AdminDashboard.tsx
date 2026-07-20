@@ -859,7 +859,7 @@ export const AdminDashboard: React.FC = () => {
               <label style={{ fontSize: "12px", fontWeight: "600", color: "#cbd5e1" }}>البريد الإلكتروني</label>
               <input
                 type="email"
-                placeholder="thiamshop1230@gmail.com"
+                placeholder="أدخل البريد الإلكتروني"
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 required
@@ -872,7 +872,7 @@ export const AdminDashboard: React.FC = () => {
                   color: "#ffffff",
                   outline: "none",
                   transition: "border-color 0.2s ease",
-                  textAlign: "left"
+                  textAlign: "right"
                 }}
               />
             </div>
@@ -881,7 +881,7 @@ export const AdminDashboard: React.FC = () => {
               <label style={{ fontSize: "12px", fontWeight: "600", color: "#cbd5e1" }}>كلمة المرور</label>
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder="أدخل كلمة المرور"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
                 required
