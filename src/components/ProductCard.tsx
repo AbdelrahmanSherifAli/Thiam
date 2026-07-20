@@ -2,7 +2,7 @@ import React from "react";
 import type { Product } from "../services/storageService";
 import { useStore } from "../context/StoreContext";
 import { useCart } from "../context/CartContext";
-import { Star, Heart, Eye } from "lucide-react";
+import { Star, Heart, Eye, Video } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -281,6 +281,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         {/* Badges */}
         <div className="card-badges">
+          {product.videoUrl && (
+            <span className="badge" style={{ backgroundColor: "#0f172a", color: "#ffffff", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              <Video size={10} /> فيديو
+            </span>
+          )}
           {product.isSoldOut && (
             <span className="badge" style={{ backgroundColor: "#ef4444", color: "#ffffff" }}>نفذت الكمية</span>
           )}

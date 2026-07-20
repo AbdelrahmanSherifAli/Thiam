@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useStore } from "../context/StoreContext";
 import { useCart } from "../context/CartContext";
-import { Star, Heart, ShoppingCart, ArrowLeft, Zap } from "lucide-react";
+import { Star, Heart, ShoppingCart, ArrowLeft, Zap, Video } from "lucide-react";
 import { getAdjustedPrice } from "../utils/price";
 
 export const ProductDetails: React.FC = () => {
@@ -20,8 +20,9 @@ export const ProductDetails: React.FC = () => {
   const prodReviewsCount = product && typeof product.reviewsCount === "number" ? product.reviewsCount : 0;
   const prodPrice = product && typeof product.price === "number" ? product.price : 0;
 
-  // Active image displaying in gallery
+  // Active image / media displaying in gallery
   const [activeImage, setActiveImage] = useState<string>("");
+  const [activeMedia, setActiveMedia] = useState<"image" | "video">("image");
   
   // Selected variant state
   const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>({});
@@ -36,6 +37,7 @@ export const ProductDetails: React.FC = () => {
   useEffect(() => {
     if (product) {
       setActiveImage(prodImages[0]);
+      setActiveMedia("image");
       setQuantity(1);
       
       const defaults: Record<string, string> = {};
@@ -121,21 +123,57 @@ export const ProductDetails: React.FC = () => {
         {/* Left Column: Gallery */}
         <div className="gallery-container">
           <div className="gallery-main">
-            <img src={activeImage || prodImages[0]} alt={product.name || "منتج"} className="gallery-main-img" />
+            {activeMedia === "video" && product.videoUrl ? (
+              <video
+                src={product.videoUrl}
+                controls
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#000000" }}
+              />
+            ) : (
+              <img src={activeImage || prodImages[0]} alt={product.name || "منتج"} className="gallery-main-img" />
+            )}
           </div>
-          {prodImages.length > 1 && (
-            <div className="gallery-thumbs">
-              {prodImages.map((img, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => setActiveImage(img)}
-                  className={`gallery-thumb ${activeImage === img ? "active" : ""}`}
-                >
-                  <img src={img} alt={`${product.name} preview ${idx}`} className="gallery-thumb-img" />
-                </div>
-              ))}
-            </div>
-          )}
+          
+          <div className="gallery-thumbs">
+            {/* Video Thumbnail if product video exists */}
+            {product.videoUrl && (
+              <div
+                onClick={() => setActiveMedia("video")}
+                className={`gallery-thumb ${activeMedia === "video" ? "active" : ""}`}
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#0f172a",
+                  color: "#ffffff"
+                }}
+                title="مشاهدة فيديو المنتج"
+              >
+                <Video size={22} style={{ color: "var(--accent-color)" }} />
+                <span style={{ fontSize: "9px", fontWeight: "700", marginTop: "2px" }}>فيديو</span>
+              </div>
+            )}
+
+            {/* Images Thumbnails */}
+            {prodImages.map((img, idx) => (
+              <div
+                key={idx}
+                onClick={() => {
+                  setActiveImage(img);
+                  setActiveMedia("image");
+                }}
+                className={`gallery-thumb ${activeMedia === "image" && activeImage === img ? "active" : ""}`}
+              >
+                <img src={img} alt={`${product.name} preview ${idx}`} className="gallery-thumb-img" />
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Right Column: Info Details */}

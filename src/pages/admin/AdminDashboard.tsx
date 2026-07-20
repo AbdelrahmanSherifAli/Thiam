@@ -19,7 +19,9 @@ import {
   ArrowDown,
   Eye,
   Settings,
-  Tag
+  Tag,
+  Video,
+  Upload
 } from "lucide-react";
 import "../../styles/admin.css";
 
@@ -186,6 +188,31 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const [prodVideoUrl, setProdVideoUrl] = useState("");
+  const [isVideoUploading, setIsVideoUploading] = useState(false);
+
+  const handleProductVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      alert("تنبيه: حجم الفيديو كبير جداً (أكثر من 15MB). يفضل رفع مقطع فيديو بحجم أقل من 10MB لضمان سرعة التحميل للعملاء.");
+    }
+
+    setIsVideoUploading(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setProdVideoUrl(event.target?.result as string);
+      setIsVideoUploading(false);
+    };
+    reader.onerror = () => {
+      alert("حدث خطأ أثناء قراءة ملف الفيديو.");
+      setIsVideoUploading(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const removeProductImage = (idx: number) => {
     setProdImagesList((prev) => prev.filter((_, i) => i !== idx));
   };
@@ -200,6 +227,7 @@ export const AdminDashboard: React.FC = () => {
     setProdDesc("");
     setProdImagesList([]);
     setManualImageUrl("");
+    setProdVideoUrl("");
     setProdCategoryId(categories[0]?.id || "");
     setProdFeatured(false);
     setProdIsSoldOut(false);
@@ -218,6 +246,7 @@ export const AdminDashboard: React.FC = () => {
     setProdDesc(prod.description || "");
     setProdImagesList(Array.isArray(prod.images) ? prod.images : []);
     setManualImageUrl("");
+    setProdVideoUrl(prod.videoUrl || "");
     setProdCategoryId(prod.categoryId || "");
     setProdFeatured(!!prod.featured);
     setProdIsSoldOut(!!prod.isSoldOut);
@@ -269,6 +298,7 @@ export const AdminDashboard: React.FC = () => {
               originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
               description: prodDesc,
               images: imagesArray,
+              videoUrl: prodVideoUrl.trim() || undefined,
               categoryId: prodCategoryId,
               featured: prodFeatured,
               isSoldOut: prodIsSoldOut,
@@ -289,6 +319,7 @@ export const AdminDashboard: React.FC = () => {
         originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
         description: prodDesc,
         images: imagesArray,
+        videoUrl: prodVideoUrl.trim() || undefined,
         categoryId: prodCategoryId,
         featured: prodFeatured,
         isSoldOut: prodIsSoldOut,
@@ -3480,6 +3511,53 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Product Video Section */}
+              <div className="admin-form-group" style={{ backgroundColor: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)", marginTop: "16px" }}>
+                <label className="admin-label" style={{ fontWeight: "700", display: "flex", alignItems: "center", gap: "6px", color: "var(--primary-color)" }}>
+                  <Video size={16} style={{ color: "var(--accent-color)" }} />
+                  <span>فيديو استعراضي للمنتج (اختياري)</span>
+                </label>
+
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", marginTop: "8px" }}>
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/ogg"
+                    onChange={handleProductVideoUpload}
+                    id="video-upload-input"
+                    style={{ display: "none" }}
+                  />
+                  <label
+                    htmlFor="video-upload-input"
+                    className="btn btn-secondary"
+                    style={{ cursor: "pointer", fontSize: "12px", padding: "8px 16px", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  >
+                    <Upload size={14} />
+                    <span>{isVideoUploading ? "جاري رفع الفيديو..." : "اختر فيديو من جهازك (.mp4)"}</span>
+                  </label>
+
+                  {prodVideoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setProdVideoUrl("")}
+                      className="btn"
+                      style={{ backgroundColor: "#fee2e2", color: "#ef4444", fontSize: "12px", padding: "6px 12px", borderRadius: "6px", border: "1px solid #fca5a5" }}
+                    >
+                      حذف الفيديو
+                    </button>
+                  )}
+                </div>
+                
+                <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginTop: "6px" }}>
+                  ينصح بمقطع فيديو قصير (من 5 إلى 15 ثانية) بحجم أقل من 10MB لضمان سرعة فائقة للعملاء.
+                </span>
+
+                {prodVideoUrl && (
+                  <div style={{ marginTop: "12px", borderRadius: "10px", overflow: "hidden", border: "1px solid var(--border-color)", maxWidth: "260px" }}>
+                    <video src={prodVideoUrl} controls style={{ width: "100%", maxHeight: "180px", display: "block", backgroundColor: "#000000" }} />
                   </div>
                 )}
               </div>

@@ -61,6 +61,7 @@ export interface Product {
   originalPrice?: number; // for discounts
   description: string;
   images: string[];
+  videoUrl?: string; // Product preview video
   categoryId: string;
   attributes: ProductAttribute[];
   featured: boolean;
