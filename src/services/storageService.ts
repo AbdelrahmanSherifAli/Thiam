@@ -47,7 +47,6 @@ export interface ThemeConfig {
   announcementEnabled?: boolean;
 }
 
-
 export interface ProductAttribute {
   name: string;
   options: string[];
@@ -83,10 +82,10 @@ export interface StoreInfo {
   email: string;
   address: string;
   socials: {
-    facebook: string;
-    instagram: string;
-    tiktok: string;
-    twitter: string;
+    facebook?: string;
+    instagram?: string;
+    tiktok?: string;
+    twitter?: string;
   };
   seo: {
     title: string;
@@ -97,9 +96,9 @@ export interface StoreInfo {
 export interface Testimonial {
   id: string;
   name: string;
+  role: string;
   text: string;
   rating: number;
-  role: string;
   avatar: string;
 }
 
@@ -148,7 +147,7 @@ export interface HomepageBlocks {
     placeholder: string;
     buttonText: string;
   };
-  blockOrder: string[]; // e.g. ["hero", "featured", "promo", "testimonials", "newsletter"]
+  blockOrder: string[];
 }
 
 export interface StaticPagesContent {
@@ -176,219 +175,238 @@ export interface StaticPagesContent {
 }
 
 // -------------------------------------------------------------
-// Seed default configurations (Luxury Perfume Maison style)
+// Seed default configurations (THIAM GYM & FITNESS STYLE)
 // -------------------------------------------------------------
 const DEFAULT_THEME: ThemeConfig = {
-  logo: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=120&q=80",
-  favicon: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=32&q=80",
+  logo: "",
+  favicon: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=32&q=80",
   colors: {
-    primary: "#0b0f19",      // Premium slate black
-    secondary: "#64748b",    // Muted slate gray
-    accent: "#c5a880",       // Luxury gold/champagne accent
-    background: "#faf9f6",   // Warm off-white
-    text: "#1e293b",         // Charcoal text
-    cardBg: "#ffffff",       // Pure white cards
-    border: "#e2e8f0"        // Soft slate gray borders
+    primary: "#0b0f19",      // Obsidian Stealth Black
+    secondary: "#64748b",    // Steel Gray
+    accent: "#22c55e",       // Electric Nitro Green
+    background: "#090d16",   // Dark Gym Ambiance
+    text: "#f8fafc",         // Crisp Light Text
+    cardBg: "#1e293b",       // Dark Slate Card
+    border: "#334155"        // Slate Border
   },
   fonts: {
     heading: "Cairo",
     body: "Cairo"
   },
   ui: {
-    borderRadius: "12px",
+    borderRadius: "14px",
     buttonStyle: "solid"
   },
-  layoutStyle: "luxury",
-  announcementText: "✨ شحن مجاني لجميع الطلبات فوق 500 جنيه بمناسبة الافتتاح! خصم 10% بكود: START ✨",
+  layoutStyle: "modern",
+  announcementText: "⚡ خصم 15% على جميع المكملات وأدوات الجيم بمناسبة الموسم الرياضي! استخدم كود الخصم: GYM15 ⚡",
   announcementEnabled: true
 };
 
 const DEFAULT_CATEGORIES: Category[] = [
-  { id: "cat-1", name: "العود والروائح الخشبية", slug: "oud-woody", image: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=400&q=80" },
-  { id: "cat-2", name: "الزهور والورود", slug: "floral-rose", image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=400&q=80" },
-  { id: "cat-3", name: "الحمضيات والانتعاش", slug: "fresh-citrus", image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=400&q=80" },
-  { id: "cat-4", name: "المسك والروائح الحلوة", slug: "musk-sweet", image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=400&q=80" }
+  { id: "cat-1", name: "المكملات والبروتينات", slug: "supplements", image: "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=400&q=80" },
+  { id: "cat-2", name: "معدات وأدوات الجيم", slug: "equipment", image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=400&q=80" },
+  { id: "cat-3", name: "الملابس الرياضية", slug: "apparel", image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=400&q=80" },
+  { id: "cat-4", name: "الفيتامينات والاستشفاء", slug: "vitamins", image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80" }
 ];
 
 const DEFAULT_PRODUCTS: Product[] = [
   {
-    id: "prod-1",
-    code: "101",
-    name: "صندل رويال إيليت",
-    price: 185.00,
-    originalPrice: 220.00,
-    description: "عطر ساحر يحتفي بخلاصة خشب الصندل العريقة. يوازن ببراعة بين النغمات الخشبية الداكنة والجلود الفاخرة، مع لمسات دافئة من العود النقي والورد الطبيعي المثير.",
+    id: "prod-101",
+    code: "GYM-101",
+    name: "واي بروتين آيزوليت نقي 100% NITRO WHEY",
+    price: 2450.00,
+    originalPrice: 2800.00,
+    description: "واي بروتين آيزوليت سريع الامتصاص وخالي من الجلوتين والدهون. يمنحك 27 جرام بروتين نقي في كل جرعة لبناء واستشفاء الكتلة العضلية بفعالية قصوى.",
     images: [
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80"
+      "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?auto=format&fit=crop&w=600&q=80"
     ],
     categoryId: "cat-1",
     attributes: [
-      { name: "الحجم", options: ["50 مل", "100 مل", "200 مل"] },
-      { name: "التركيز", options: ["أو دو برفان", "إكستريت دو برفان"] }
-    ],
-    featured: true,
-    rating: 4.8,
-    reviewsCount: 42
-  },
-  {
-    id: "prod-2",
-    code: "102",
-    name: "عود سيلك فلفيت",
-    price: 195.00,
-    description: "رائحة حريرية ناعمة تمتزج فيها نفحات الورد البلغاري الفاخر والبابونج الأزرق، منسوجة بمهارة مع قاعدة عطرية دافئة من خشب العود اللاوسي الطبيعي ونسمات البردي الغنية.",
-    images: [
-      "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=600&q=80"
-    ],
-    categoryId: "cat-1",
-    attributes: [
-      { name: "الحجم", options: ["100 مل"] }
+      { name: "النكهة", options: ["شوكولاتة بلجيكية", "فانيليا آيس كريم", "فراولة كليفلاند", "كوكيز وكريم"] },
+      { name: "الحجم", options: ["2 كيلو (5 باوند)", "4.5 كيلو"] }
     ],
     featured: true,
     rating: 4.9,
-    reviewsCount: 29
+    reviewsCount: 84
   },
   {
-    id: "prod-3",
-    code: "103",
-    name: "إمبيريال روز آند بيوني",
-    price: 145.00,
-    originalPrice: 165.00,
-    description: "باقة زهرية منعشة ومشرقة تجسد بتلات الورد الدمشقي المخملية الممزوجة بنقاء المسك الأبيض والماندرين الفوار وزهور الفاوانيا الوردية المنعشة.",
+    id: "prod-102",
+    code: "GYM-102",
+    name: "كراتين مونوهيدرات مايكرونايزد 500g PURE CREATINE",
+    price: 1150.00,
+    description: "كراتين مونوهيدرات نقي بحجم جزيئات ناعم جداً لزيادة الطاقة والقوة الانفجارية والحجم العضلي أثناء التمرين الشديد.",
     images: [
-      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80"
+      "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?auto=format&fit=crop&w=600&q=80"
+    ],
+    categoryId: "cat-1",
+    attributes: [
+      { name: "الوزن", options: ["250 جرام (50 جرعة)", "500 جرام (100 جرعة)"] },
+      { name: "النكهة", options: ["بدون نكهة (سادة)", "تفاح أخضر", "توت أزرق"] }
+    ],
+    featured: true,
+    rating: 5.0,
+    reviewsCount: 120
+  },
+  {
+    id: "prod-103",
+    code: "GYM-103",
+    name: "طقم دامبلز هكس مطاطي احترافي HEX DUMBBELLS",
+    price: 3200.00,
+    originalPrice: 3600.00,
+    description: "دامبلز سداسية الشكل مغطاة بمطاط عالي الجودة لحماية الأرضيات ومزودة بمقبض حديدي مضلع لمنع الانزلاق أثناء الأوزان الثقيلة.",
+    images: [
+      "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=600&q=80"
     ],
     categoryId: "cat-2",
     attributes: [
-      { name: "الحجم", options: ["50 مل", "100 مل"] },
-      { name: "نوع العلبة", options: ["علبة قياسية", "علبة هدايا فاخرة"] }
+      { name: "الوزن الزوجي", options: ["10 كيلو (5x2)", "20 كيلو (10x2)", "30 كيلو (15x2)"] }
     ],
     featured: true,
-    rating: 4.6,
-    reviewsCount: 18
+    rating: 4.8,
+    reviewsCount: 45
   },
   {
-    id: "prod-4",
-    code: "104",
-    name: "سيتروس نيرولي إنفيوجن",
-    price: 130.00,
-    description: "نسيم حيوي مشبع بأشعة الشمس من زهر البرتقال والبرغموت وخشب البرتقال المر. يجسد نزهة ساحلية منعشة على شواطئ الريفييرا الإيطالية.",
+    id: "prod-104",
+    code: "GYM-104",
+    name: "تيشيرت ضاغط احترافي للتمرين PRO COMPRESSION T-SHIRT",
+    price: 650.00,
+    originalPrice: 790.00,
+    description: "تيشيرت ضاغط مرن بخامة مسامية طاردة للعرق تحافظ على برودة وصحة العضلات وتدعم الحركة الحرة أثناء التدريب المكثف.",
     images: [
-      "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=600&q=80"
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80"
     ],
     categoryId: "cat-3",
     attributes: [
-      { name: "الحجم", options: ["100 مل", "150 مل"] }
+      { name: "اللون", options: ["أسود ستيلث", "أزرق نيون", "رمادي تيتانيوم"] },
+      { name: "المقاس", options: ["M", "L", "XL", "2XL"] }
     ],
     featured: false,
-    rating: 4.7,
-    reviewsCount: 35
+    rating: 4.9,
+    reviewsCount: 67
   },
   {
-    id: "prod-5",
-    code: "105",
-    name: "جولدن مسك إنتنس",
-    price: 160.00,
-    description: "رائحة مخملية حسية يهيمن عليها المسك الأبيض الفاخر، خشب الأرز الدافئ، فانيليا مدغشقر الحلوة، ونسمات بودرة العنبر الناعمة.",
+    id: "prod-105",
+    code: "GYM-105",
+    name: "حزام رفع أثقال جلدي طبيعي PRO LIFTING BELT",
+    price: 1450.00,
+    description: "حزام ضهر احترافي مصمم من الجلد الطبيعي المدعم بإبزيم صلب مزدوج لحماية الظهر وتوفير أقصى ثبات أثناء تمارين السكوات والديدليفت.",
     images: [
-      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80"
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80"
     ],
-    categoryId: "cat-4",
+    categoryId: "cat-2",
     attributes: [
-      { name: "الحجم", options: ["50 مل", "100-مل"] }
+      { name: "المقاس", options: ["S", "M", "L", "XL"] },
+      { name: "اللون", options: ["أسود ملكي", "بني جلد طبيعي"] }
     ],
     featured: true,
     rating: 4.9,
-    reviewsCount: 57
+    reviewsCount: 38
+  },
+  {
+    id: "prod-106",
+    code: "GYM-106",
+    name: "باك فيتامينات واستشفاء المفاصل ULTRA GYM VITAMINS",
+    price: 890.00,
+    description: "تركيبة متكاملة من أوميجا 3 عالية التركيز، فيتامين D3، المغنيسيوم، ومحفزات استشفاء المفاصل والأنسجة الرياضية.",
+    images: [
+      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80"
+    ],
+    categoryId: "cat-4",
+    attributes: [
+      { name: "العبوة", options: ["90 كبسولة", "180 كبسولة"] }
+    ],
+    featured: true,
+    rating: 4.8,
+    reviewsCount: 92
   }
 ];
 
 const DEFAULT_STORE_INFO: StoreInfo = {
   whatsapp: "+201007890123",
   phone: "+201007890123",
-  email: "contact@maisonoud.com",
-  address: "12 شارع مونتين، باريس، فرنسا / التجمع الخامس، القاهرة، مصر",
+  email: "support@thiamgym.com",
+  address: "فرع التجمع الخامس / الشيخ زايد / المعادي، القاهرة، مصر",
   socials: {
-    facebook: "https://facebook.com/maisonoud",
-    instagram: "https://instagram.com/maisonoud",
-    tiktok: "https://tiktok.com/@maisonoud",
-    twitter: "https://twitter.com/maisonoud"
+    facebook: "https://facebook.com/thiamgym",
+    instagram: "https://instagram.com/thiamgym",
+    tiktok: "https://tiktok.com/@thiamgym",
+    twitter: "https://twitter.com/thiamgym"
   },
   seo: {
-    title: "ميزون عود | عطور فاخرة ونادرة",
-    description: "اختبر الفخامة المطلقة مع ميزون عود. عطور حصرية مستخلصة يدوياً من زيت العود النقي وخشب الصندل والورد الدمشقي الأصيل."
+    title: "ثيام جيم | THIAM GYM & FITNESS",
+    description: "المصدر الأول للأدوات الرياضية، المكملات الغذائية الأصلية 100%، الواي بروتين، الكراتين، والملابس الاحترافية للتمرين."
   }
 };
 
 const DEFAULT_HOMEPAGE: HomepageBlocks = {
   hero: {
     enabled: true,
-    title: "فن العطور الراقية والفاخرة",
-    subtitle: "اكتشف مجموعتنا الخاصة والحصرية من العطور الفاخرة المستخلصة من أندر المكونات الطبيعية في العالم.",
-    bgImage: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=1600&q=80",
-    bgImage2: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80",
-    bgImage3: "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=400&q=80",
-    ctaText: "اكتشف المجموعة",
+    title: "تحدى حدودك وابنِ جسدك القوي ⚡",
+    subtitle: "المصدر الأول والأوثق للمكملات الغذائية الأصلية 100% ومعدات الجيم الاحترافية بأفضل الأسعار وتوصيل سريع.",
+    bgImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=80",
+    bgImage2: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=400&q=80",
+    bgImage3: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=400&q=80",
+    ctaText: "تصفح المنتجات والمكملات",
     ctaLink: "#shop",
     align: "center"
   },
   featured: {
     enabled: true,
-    title: "روائع عطرية مختارة",
-    subtitle: "مجموعة من العطور المميزة والفريدة المختارة بعناية لأصحاب الذوق العطري الرفيع.",
-    limit: 4,
+    title: "أفضل مبيعات الجيم والمكملات 💥",
+    subtitle: "المكملات والأدوات الرياضية الأعلى تقييماً وطلباً من أبطال اللياقة والتمرين.",
+    limit: 6,
     layout: "grid"
   },
   promo: {
     enabled: true,
-    title: "العروض الحصرية الخاصة",
+    title: "عروض اللياقة والتمرين الحصرية",
     banners: [
       {
         id: "promo-1",
-        title: "مجموعة العود الخاصة والفاخرة",
-        subtitle: "احصل على علبة قطيفة ملكية فاخرة مجاناً مع كل عملية شراء لعطر عود بحجم 100 مل.",
-        image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80",
-        link: "#category/oud-woody",
+        title: "باك بناء العضلات والضخامة",
+        subtitle: "احصل على شيكر احترافي مجاناً عند شراء واي بروتين آيزوليت + كراتين مونوهيدرات.",
+        image: "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=800&q=80",
+        link: "#category/supplements",
         size: "half"
       },
       {
         id: "promo-2",
-        title: "صناديق الهدايا المميزة والتذكارية",
-        subtitle: "صمم صندوق هداياك الخاص بـ 3 عبوات صغيرة بحجم 15 مل لتجربة عطورنا الأكثر مبيعاً.",
-        image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80",
-        link: "#shop",
+        title: "تجهيز الجيم المنزلي والتدريب",
+        subtitle: "خصم خاص على الدامبلز، أحزام الظهر، وحبال المقاومة الاحترافية.",
+        image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80",
+        link: "#category/equipment",
         size: "half"
       }
     ]
   },
   testimonials: {
     enabled: true,
-    title: "حكايات عطرية من عملائنا",
+    title: "آراء أبطال الجيم والمتدربين",
     list: [
       {
         id: "t-1",
-        name: "أميرة حسن",
-        role: "عميل مؤكد",
-        text: "صندل رويال إيليت أصبح عطري المفضل والمميز بلا منافس. ثبات خشب الصندل والورد يدوم لأكثر من 24 ساعة، والتغليف فاخر وجذاب للغاية.",
+        name: "كابتن أحمد سامي",
+        role: "مدرب لياقة بدنية",
+        text: "الواي بروتين آيزوليت والكراتين أصلية 100% وسريعة الامتصاص بدون أي مشاكل في الهضم. سرعة التوصيل والتغليف ممتازة جداً.",
         rating: 5,
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
       },
       {
         id: "t-2",
-        name: "يوسف المنصوري",
-        role: "خبير عطور",
-        text: "عطر عود سيلك فلفيت هو تحفة فنية حقيقية. دمج خشب العود مع نسمات البابونج يضفي رقياً ونعومة غير مسبوقة تختلف تماماً عن باقي عطور العود الثقيلة.",
+        name: "عمر الشريف",
+        role: "لاعب كمال أجسام",
+        text: "خامة الدامبلز وحزام الظهر متينة جداً وتتحمل الأوزان الثقيلة في التمرين. أفضل متجر رياضي جربته بلا منازع.",
         rating: 5,
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80"
       }
     ]
   },
   newsletter: {
     enabled: false,
-    title: "انضم إلى نادينا الخاص والمغلق",
-    description: "اشترك لتكون أول من يعلم بإطلاق مجموعات العطور الخاصة والمحدودة، والحفلات الخاصة والخصومات الحصرية لأعضاء النادي.",
-    placeholder: "أدخل بريدك الإلكتروني هنا",
+    title: "انضم إلى فريق الأبطال",
+    description: "اشترك لتصلك نصائح التغذية، برامج التمرين المجانية، والخصومات الحصرية.",
+    placeholder: "أدخل بريدك الإلكتروني",
     buttonText: "اشترك الآن"
   },
   blockOrder: ["hero", "featured", "promo", "testimonials"]
@@ -396,59 +414,52 @@ const DEFAULT_HOMEPAGE: HomepageBlocks = {
 
 const DEFAULT_PAGES: StaticPagesContent = {
   about: {
-    title: "تراثنا وقصتنا العريقة",
-    content: `تأسست ميزون عود برؤية واضحة تهدف لإعادة تعريف الترف العطري وصياغة تجارب حسية غير مسبوقة تدوم طويلاً. يستخلص خبراؤنا زيت العود الهندي النقي من آسام، وبتلات الورد الدمشقي العطرية من مرتفعات سوريا، وخلاصة خشب الصندل العضوي من سريلانكا.\n\nكل زجاجة تمثل شهوراً من التعتيق والمطابقة الدقيقة، وتُصب يدوياً في زجاجات مصممة خصيصاً لحجب الأشعة فوق البنفسجية وحفظ جودة الزيوت العطرية. التزامنا بمصادر الاستدامة يضمن حماية المكونات الطبيعية وإعادة زراعتها.`,
-    image: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=800&q=80"
+    title: "عن ثيام جيم ورسالتنا الرياضية",
+    content: `تأسست ثيام جيم لتكون الواجهة الأولى والأشمل لأبطال اللياقة البدنية والرياضة في الوطن العربي. نحن نوفر مكملات غذائية أصلية 100% مأخوذة مباشرة من المصانع المعتمدة دولياً، بجانب معدات الجيم وملابس التمرين المصممة باحترافية.\n\nهدفنا مساعدتك على الوصول لأقصى أداء بدني وتجاوز أهدافك العضلية بأمان وجودة لا تضاهى.`,
+    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80"
   },
   contact: {
-    title: "تواصل معنا مباشرة",
-    content: "يسعدنا دائماً استقبالكم في معارضنا أو مساعدتكم عبر الإنترنت. للاستفسارات العامة، أو لحجز جلسات استشارية خاصة باختيار العطور، يرجى ملء النموذج وسنتواصل معكم في غضون ساعتين."
+    title: "تواصل مع فريق الدعم الرياضي",
+    content: "فريقنا الرياضي ومتخصصو التغذية جاهزون للرد على استفساراتك واختيار المكملات والمعدات المناسبة لنوع تمرينك."
   },
   faq: {
-    title: "الأسئلة الشائعة",
+    title: "الأسئلة الشائعة عن المنتجات والتوصيل",
     list: [
       {
-        q: "ما الفرق بين أو دو برفان وإكستريت دو برفان؟",
-        a: "يحتوي أو دو برفان (EDP) عادة على تركيز عطري يتراوح بين 15% و20%، ويدوم من 6 إلى 8 ساعات. بينما يمثل إكستريت دو برفان أعلى تركيز عطري بنسبة 20% إلى 40%، مما يمنحه ثباتاً وفواحاً فائقاً يدوم من 12 إلى 24 ساعة فأكثر."
+        q: "هل المكملات الغذائية أصلية ومضمونة 100%؟",
+        a: "نعم جميع المكملات بروتينات وكراتين وفيتامينات أصلية ومستوردة من الموزعين المعتمدين مع باركود الأصالة والتاريخ."
       },
       {
-        q: "كيف تعمل عملية الشراء عبر واتس آب؟",
-        a: "بعد مراجعة المنتجات وإدخال عنوانك في صفحة الدفع، سيقوم النظام تلقائياً بتجميع تفاصيل طلبك وإعداد فاتورة منسقة باللغة العربية، ثم يفتح محادثة واتس آب مباشرة مع خدمة العملاء لإرسالها وتأكيد الشحن والطلب في ثوانٍ!"
-      },
-      {
-        q: "هل يتوفر الشحن الدولي لمختلف الدول؟",
-        a: "نعم، نشحن لجميع دول العالم عن طريق DHL Express، وتُعبأ جميع العطور في صناديق معزولة حرارياً لضمان الحفاظ على ثبات الزيوت العطرية أثناء الشحن."
+        q: "كيف يتم طلب الشراء والتوصيل؟",
+        a: "اختر منتجاتك واضغط إتمام الطلب ليقوم النظام بتجهيز الفاتورة فتح الواتساب للتأكيد والتوصيل خلال 24 إلى 48 ساعة."
       }
     ]
   },
   privacy: {
-    title: "سياسة الخصوصية وسرية البيانات",
-    content: "خصوصيتك تهمنا للغاية. نظراً لأن هذا المتجر يعمل بالكامل في الواجهة الأمامية (Frontend) وبدون خوادم تخزين، فنحن لا نحفظ بياناتك الشخصية في قواعد بيانات خارجية. تُخزن بيانات السلة محلياً في متصفحك (localStorage). البيانات الوحيدة التي تخرج هي التي تختار إرسالها بنفسك كرسالة واتساب."
+    title: "سياسة الخصوصية والأمان",
+    content: "نحن نلتزم بحماية بياناتك الشخصية وعنوانك، ولن يتم مشاركتها إلا لغرض توصيل الطلب بنجاح."
   },
   terms: {
-    title: "الشروط والأحكام وسياسات البيع",
-    content: "بإرسال طلبك عبر واتساب، فإنك تبدأ استفساراً مباشراً حول توفر المنتجات. الأسعار المعروضة هي قيم استرشادية، ويتم تأكيد الطلب النهائي وتكاليف التوصيل من خلال التواصل المباشر مع ممثل المبيعات في محادثة الواتساب."
+    title: "الشروط والأحكام",
+    content: "جميع المنتجات المعروضة هي للبالغين وممارسي الرياضة، وتخضع لضمان الجودة والاسترجاع في حال التلف."
   }
 };
 
-// -------------------------------------------------------------
-// Storage Keys Helper
-// -------------------------------------------------------------
 const KEYS = {
   THEME: "ecommerce_theme_config",
-  PRODUCTS: "ecommerce_products",
   CATEGORIES: "ecommerce_categories",
   STORE_INFO: "ecommerce_store_info",
   HOMEPAGE: "ecommerce_homepage_blocks",
   PAGES: "ecommerce_pages_content",
   CART: "ecommerce_cart_items",
   WISHLIST: "ecommerce_wishlist_items",
-  COUPONS: "ecommerce_coupons"
+  COUPONS: "ecommerce_coupons",
+  PRODUCTS: "ecommerce_products"
 };
 
 const DEFAULT_COUPONS = [
-  { id: "1", code: "MAISON10", type: "percentage", value: 10, minOrderValue: 0, isActive: true },
-  { id: "2", code: "WELCOME50", type: "fixed", value: 50, minOrderValue: 200, isActive: true }
+  { id: "1", code: "GYM15", type: "percentage", value: 15, minOrderValue: 0, isActive: true },
+  { id: "2", code: "PRO500", type: "fixed", value: 100, minOrderValue: 1000, isActive: true }
 ];
 
 // -------------------------------------------------------------
@@ -457,9 +468,9 @@ const DEFAULT_COUPONS = [
 export const StorageService = {
   // Central init function to seed defaults if missing
   init() {
-    // Auto-migration: check if existing localStorage seeds are using the old English configs (Outfit font)
+    // Check if localStorage has old perfume data, migrate to Gym theme
     const existingTheme = localStorage.getItem(KEYS.THEME);
-    if (existingTheme && existingTheme.includes("Outfit")) {
+    if (existingTheme && (existingTheme.includes("maisonoud") || existingTheme.includes("عود") || existingTheme.includes("Outfit"))) {
       localStorage.removeItem(KEYS.THEME);
       localStorage.removeItem(KEYS.CATEGORIES);
       localStorage.removeItem(KEYS.PRODUCTS);
@@ -497,7 +508,7 @@ export const StorageService = {
     }
   },
 
-  // Reset database back to default luxury seed values
+  // Reset database back to default gym seed values
   resetToDefaults() {
     localStorage.setItem(KEYS.THEME, JSON.stringify(DEFAULT_THEME));
     localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(DEFAULT_CATEGORIES));
@@ -558,12 +569,21 @@ export const StorageService = {
       const cloudData = await response.json();
       if (cloudData && typeof cloudData === "object" && Object.keys(cloudData).length > 0) {
         if (cloudData.theme) localStorage.setItem(KEYS.THEME, JSON.stringify(cloudData.theme));
-        if (cloudData.categories) localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(cloudData.categories));
-        if (cloudData.products) localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(cloudData.products));
+        if (cloudData.categories) {
+          const cats = Array.isArray(cloudData.categories) ? cloudData.categories : Object.values(cloudData.categories);
+          localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(cats));
+        }
+        if (cloudData.products) {
+          const prods = Array.isArray(cloudData.products) ? cloudData.products : Object.values(cloudData.products);
+          localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(prods));
+        }
         if (cloudData.storeInfo) localStorage.setItem(KEYS.STORE_INFO, JSON.stringify(cloudData.storeInfo));
         if (cloudData.homepage) localStorage.setItem(KEYS.HOMEPAGE, JSON.stringify(cloudData.homepage));
         if (cloudData.pages) localStorage.setItem(KEYS.PAGES, JSON.stringify(cloudData.pages));
-        if (cloudData.coupons) localStorage.setItem(KEYS.COUPONS, JSON.stringify(cloudData.coupons));
+        if (cloudData.coupons) {
+          const c = Array.isArray(cloudData.coupons) ? cloudData.coupons : Object.values(cloudData.coupons);
+          localStorage.setItem(KEYS.COUPONS, JSON.stringify(c));
+        }
         return true;
       } else {
         // Cloud database is empty (null). Seed it with default store data!
@@ -672,7 +692,14 @@ export const StorageService = {
   // Categories
   getCategories(): Category[] {
     this.init();
-    return JSON.parse(localStorage.getItem(KEYS.CATEGORIES)!);
+    try {
+      const data = localStorage.getItem(KEYS.CATEGORIES);
+      if (!data) return DEFAULT_CATEGORIES;
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : Object.values(parsed);
+    } catch (e) {
+      return DEFAULT_CATEGORIES;
+    }
   },
   saveCategories(categories: Category[]): void {
     localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(categories));
@@ -682,7 +709,14 @@ export const StorageService = {
   // Products
   getProducts(): Product[] {
     this.init();
-    return JSON.parse(localStorage.getItem(KEYS.PRODUCTS)!);
+    try {
+      const data = localStorage.getItem(KEYS.PRODUCTS);
+      if (!data) return DEFAULT_PRODUCTS;
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : Object.values(parsed);
+    } catch (e) {
+      return DEFAULT_PRODUCTS;
+    }
   },
   saveProducts(products: Product[]): void {
     localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
@@ -722,10 +756,28 @@ export const StorageService = {
   // Cart Items
   getCart(): any[] {
     this.init();
-    return JSON.parse(localStorage.getItem(KEYS.CART)!);
+    try {
+      const data = localStorage.getItem(KEYS.CART);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error("Error reading cart from localStorage:", e);
+      return [];
+    }
   },
   saveCart(cart: any[]): void {
-    localStorage.setItem(KEYS.CART, JSON.stringify(cart));
+    try {
+      // Strip large videoUrl from products in the cart to avoid localStorage QuotaExceededError
+      const cleanedCart = cart.map((item) => {
+        if (item.product && typeof item.product === "object") {
+          const { videoUrl, ...rest } = item.product;
+          return { ...item, product: rest };
+        }
+        return item;
+      });
+      localStorage.setItem(KEYS.CART, JSON.stringify(cleanedCart));
+    } catch (e) {
+      console.error("Error saving cart to localStorage:", e);
+    }
   },
 
   // Wishlist Items
