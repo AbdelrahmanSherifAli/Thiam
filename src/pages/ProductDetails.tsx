@@ -11,7 +11,7 @@ export const ProductDetails: React.FC = () => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { t } = useLanguage();
 
-  const product = products.find((p) => p.id === selectedProductId);
+  const product = products.find((p) => p.id === selectedProductId || (p.code && p.code.toLowerCase().trim() === selectedProductId?.toLowerCase().trim()));
 
   // Fallback safe values for product fields
   const prodImages = product && Array.isArray(product.images) && product.images.length > 0
