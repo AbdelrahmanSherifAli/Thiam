@@ -247,7 +247,7 @@ export const AdminDashboard: React.FC = () => {
     setIsProductModalOpen(true);
   };
 
-  const openEditProduct = (prod: Product) => {
+  const openEditProduct = async (prod: Product) => {
     setEditingProduct(prod);
     setProdName(prod.name || "");
     setProdCode(prod.code || "");
@@ -256,7 +256,16 @@ export const AdminDashboard: React.FC = () => {
     setProdDesc(prod.description || "");
     setProdImagesList(Array.isArray(prod.images) ? prod.images : []);
     setManualImageUrl("");
-    setProdVideoUrl(prod.videoUrl || "");
+
+    // Resolve base64 video URL if stored as local IndexedDB/Firebase reference
+    if (prod.videoUrl && prod.videoUrl.startsWith("db-media://")) {
+      setProdVideoUrl("جاري التحميل...");
+      const resolved = await StorageService.resolveMediaUrl(prod.videoUrl, prod.id);
+      setProdVideoUrl(resolved || "");
+    } else {
+      setProdVideoUrl(prod.videoUrl || "");
+    }
+
     setProdCategoryId(prod.categoryId || "");
     setProdFeatured(!!prod.featured);
     setProdIsSoldOut(!!prod.isSoldOut);
@@ -278,7 +287,7 @@ export const AdminDashboard: React.FC = () => {
     setIsProductModalOpen(true);
   };
 
-  const handleProductSubmit = (e: React.FormEvent) => {
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prodName || prodPrice <= 0 || !prodCategoryId) {
       alert("الاسم، السعر الصالح، والقسم مطلوبة.");
@@ -314,6 +323,25 @@ export const AdminDashboard: React.FC = () => {
       }
     });
 
+    const productId = editingProduct ? editingProduct.id : `prod-${Date.now()}`;
+    let finalVideoUrl: string | undefined = prodVideoUrl.trim() || undefined;
+
+    // Handle large base64 uploaded videos
+    if (finalVideoUrl && finalVideoUrl.startsWith("data:")) {
+      try {
+        finalVideoUrl = await StorageService.saveMedia(productId, finalVideoUrl);
+      } catch (err) {
+        console.error("Error saving uploaded video:", err);
+      }
+    } else if (!finalVideoUrl && editingProduct && editingProduct.videoUrl?.startsWith("db-media://")) {
+      // If video was cleared, delete from IndexedDB & Cloud
+      try {
+        await StorageService.deleteMedia(productId);
+      } catch (err) {
+        console.error("Error deleting video:", err);
+      }
+    }
+
     if (editingProduct) {
       // Modify existing product
       const updated = products.map((p) =>
@@ -326,7 +354,7 @@ export const AdminDashboard: React.FC = () => {
               originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
               description: prodDesc,
               images: imagesArray,
-              videoUrl: prodVideoUrl.trim() || undefined,
+              videoUrl: finalVideoUrl,
               categoryId: prodCategoryId,
               featured: prodFeatured,
               isSoldOut: prodIsSoldOut,
@@ -343,14 +371,14 @@ export const AdminDashboard: React.FC = () => {
     } else {
       // Create new product
       const newProd: Product = {
-        id: `prod-${Date.now()}`,
+        id: productId,
         name: prodName,
         code: prodCode.trim() || undefined,
         price: prodPrice,
         originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
         description: prodDesc,
         images: imagesArray,
-        videoUrl: prodVideoUrl.trim() || undefined,
+        videoUrl: finalVideoUrl,
         categoryId: prodCategoryId,
         featured: prodFeatured,
         isSoldOut: prodIsSoldOut,
@@ -367,9 +395,14 @@ export const AdminDashboard: React.FC = () => {
     setIsProductModalOpen(false);
   };
 
-  const handleProductDelete = (id: string) => {
+  const handleProductDelete = async (id: string) => {
     if (window.confirm("هل أنت متأكد من رغبتك في حذف هذا المنتج؟")) {
       updateProducts(products.filter((p) => p.id !== id));
+      try {
+        await StorageService.deleteMedia(id);
+      } catch (err) {
+        console.error("Error deleting media during product delete:", err);
+      }
     }
   };
 

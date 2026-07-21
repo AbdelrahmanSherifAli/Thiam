@@ -448,6 +448,81 @@ const DEFAULT_PAGES: StaticPagesContent = {
   }
 };
 
+// -------------------------------------------------------------
+// IndexedDB Video Store for bypassing localStorage limits
+// -------------------------------------------------------------
+const DB_NAME = "ThiamMediaDB";
+const STORE_NAME = "videos";
+const DB_VERSION = 1;
+
+let dbInstance: IDBDatabase | null = null;
+
+const getDB = (): Promise<IDBDatabase> => {
+  if (dbInstance) return Promise.resolve(dbInstance);
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => {
+      dbInstance = request.result;
+      resolve(dbInstance);
+    };
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+};
+
+export const VideoDb = {
+  async get(id: string): Promise<string | null> {
+    try {
+      const db = await getDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.get(id);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    } catch (e) {
+      console.error("IndexedDB get error:", e);
+      return null;
+    }
+  },
+  async set(id: string, base64Data: string): Promise<void> {
+    try {
+      const db = await getDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.put(base64Data, id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    } catch (e) {
+      console.error("IndexedDB set error:", e);
+    }
+  },
+  async delete(id: string): Promise<void> {
+    try {
+      const db = await getDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.delete(id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    } catch (e) {
+      console.error("IndexedDB delete error:", e);
+    }
+  }
+};
+
 const KEYS = {
   THEME: "ecommerce_theme_config",
   CATEGORIES: "ecommerce_categories",
@@ -722,8 +797,84 @@ export const StorageService = {
     }
   },
   saveProducts(products: Product[]): void {
-    localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
+    try {
+      localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
+    } catch (e) {
+      console.error("Failed to save products to localStorage directly:", e);
+    }
     this.syncToCloud();
+  },
+
+  async saveMedia(productId: string, base64Data: string): Promise<string> {
+    const mediaId = `video-${productId}`;
+    await VideoDb.set(mediaId, base64Data);
+
+    const settings = this.getCloudSettings();
+    if (settings.databaseUrl) {
+      try {
+        let dbUrl = settings.databaseUrl.trim();
+        if (dbUrl.endsWith("/")) dbUrl = dbUrl.slice(0, -1);
+        await fetch(`${dbUrl}/videos/${productId}.json`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ data: base64Data })
+        });
+      } catch (err) {
+        console.error("Error saving video to cloud:", err);
+      }
+    }
+    return `db-media://${mediaId}`;
+  },
+
+  async resolveMediaUrl(url: string, productId: string): Promise<string> {
+    if (!url) return "";
+    if (!url.startsWith("db-media://")) return url;
+
+    const mediaId = url.replace("db-media://", "");
+    try {
+      const cached = await VideoDb.get(mediaId);
+      if (cached) return cached;
+    } catch (e) {
+      console.error("Error reading from local DB:", e);
+    }
+
+    const settings = this.getCloudSettings();
+    if (settings.databaseUrl) {
+      try {
+        let dbUrl = settings.databaseUrl.trim();
+        if (dbUrl.endsWith("/")) dbUrl = dbUrl.slice(0, -1);
+        const response = await fetch(`${dbUrl}/videos/${productId}.json`);
+        if (response.ok) {
+          const json = await response.json();
+          if (json && json.data) {
+            await VideoDb.set(mediaId, json.data);
+            return json.data;
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching video from cloud:", err);
+      }
+    }
+
+    return "";
+  },
+
+  async deleteMedia(productId: string): Promise<void> {
+    const mediaId = `video-${productId}`;
+    await VideoDb.delete(mediaId);
+
+    const settings = this.getCloudSettings();
+    if (settings.databaseUrl) {
+      try {
+        let dbUrl = settings.databaseUrl.trim();
+        if (dbUrl.endsWith("/")) dbUrl = dbUrl.slice(0, -1);
+        await fetch(`${dbUrl}/videos/${productId}.json`, { method: "DELETE" });
+      } catch (err) {
+        console.error("Error deleting video from cloud:", err);
+      }
+    }
   },
 
   // Store Info

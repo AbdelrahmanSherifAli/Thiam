@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 import { Star, Heart, ShoppingCart, ArrowLeft, Zap, Video } from "lucide-react";
 import { getAdjustedPrice } from "../utils/price";
+import { StorageService } from "../services/storageService";
 
 export const ProductDetails: React.FC = () => {
   const { selectedProductId, products, categories, setCurrentView, setActiveCategorySlug } = useStore();
@@ -64,6 +65,25 @@ export const ProductDetails: React.FC = () => {
       }
     }
   }, [selectedProductId, product]);
+
+  const [resolvedVideoUrl, setResolvedVideoUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (product && product.videoUrl) {
+      if (product.videoUrl.startsWith("db-media://")) {
+        StorageService.resolveMediaUrl(product.videoUrl, product.id).then((url) => {
+          setResolvedVideoUrl(url);
+        }).catch((err) => {
+          console.error("Error resolving video URL:", err);
+          setResolvedVideoUrl("");
+        });
+      } else {
+        setResolvedVideoUrl(product.videoUrl);
+      }
+    } else {
+      setResolvedVideoUrl("");
+    }
+  }, [product]);
 
   if (!product) {
     return (
@@ -173,56 +193,62 @@ export const ProductDetails: React.FC = () => {
         {/* Left Column: Gallery */}
         <div className="gallery-container">
           <div className="gallery-main">
-            {activeMedia === "video" && product.videoUrl ? (() => {
-              const url = product.videoUrl;
-              if (url.includes("youtube.com/watch?v=")) {
-                const videoId = url.split("v=")[1]?.split("&")[0];
+            {activeMedia === "video" && product.videoUrl ? (
+              !resolvedVideoUrl ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", color: "#fff", backgroundColor: "#000" }}>
+                  <span>جاري تحميل الفيديو...</span>
+                </div>
+              ) : (() => {
+                const url = resolvedVideoUrl;
+                if (url.includes("youtube.com/watch?v=")) {
+                  const videoId = url.split("v=")[1]?.split("&")[0];
+                  return (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
+                      title={product.name}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
+                    />
+                  );
+                }
+                if (url.includes("youtu.be/")) {
+                  const videoId = url.split("youtu.be/")[1]?.split("?")[0];
+                  return (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
+                      title={product.name}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
+                    />
+                  );
+                }
+                if (url.includes("vimeo.com/")) {
+                  const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+                  return (
+                    <iframe
+                      src={`https://player.vimeo.com/video/${videoId}?autoplay=1`}
+                      title={product.name}
+                      allow="autoplay; fullscreen"
+                      allowFullScreen
+                      style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
+                    />
+                  );
+                }
                 return (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
-                    title={product.name}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
+                  <video
+                    src={resolvedVideoUrl}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#000000" }}
                   />
                 );
-              }
-              if (url.includes("youtu.be/")) {
-                const videoId = url.split("youtu.be/")[1]?.split("?")[0];
-                return (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
-                    title={product.name}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
-                  />
-                );
-              }
-              if (url.includes("vimeo.com/")) {
-                const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
-                return (
-                  <iframe
-                    src={`https://player.vimeo.com/video/${videoId}?autoplay=1`}
-                    title={product.name}
-                    allow="autoplay; fullscreen"
-                    allowFullScreen
-                    style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#000" }}
-                  />
-                );
-              }
-              return (
-                <video
-                  src={product.videoUrl}
-                  controls
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#000000" }}
-                />
-              );
-            })() : (
+              })()
+            ) : (
               <img src={activeImage || prodImages[0]} alt={product.name || "منتج"} className="gallery-main-img" />
             )}
           </div>
