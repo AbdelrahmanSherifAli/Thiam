@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore } from "../../context/StoreContext";
 import { StorageService } from "../../services/storageService";
 import type { Product, Category } from "../../services/storageService";
@@ -194,6 +194,22 @@ export const AdminDashboard: React.FC = () => {
 
   const [prodVideoUrl, setProdVideoUrl] = useState("");
   const [isVideoUploading, setIsVideoUploading] = useState(false);
+  const [resolvedVideoPreviewUrl, setResolvedVideoPreviewUrl] = useState("");
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
+
+  useEffect(() => {
+    if (!prodVideoUrl) {
+      setResolvedVideoPreviewUrl("");
+      return;
+    }
+    if (prodVideoUrl.startsWith("db-media://")) {
+      StorageService.resolveMediaUrl(prodVideoUrl, editingProduct?.id || "").then((url) => {
+        setResolvedVideoPreviewUrl(url);
+      });
+    } else {
+      setResolvedVideoPreviewUrl(prodVideoUrl);
+    }
+  }, [prodVideoUrl, editingProduct]);
 
   const handleProductVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -247,7 +263,7 @@ export const AdminDashboard: React.FC = () => {
     setIsProductModalOpen(true);
   };
 
-  const openEditProduct = async (prod: Product) => {
+  const openEditProduct = (prod: Product) => {
     setEditingProduct(prod);
     setProdName(prod.name || "");
     setProdCode(prod.code || "");
@@ -256,16 +272,7 @@ export const AdminDashboard: React.FC = () => {
     setProdDesc(prod.description || "");
     setProdImagesList(Array.isArray(prod.images) ? prod.images : []);
     setManualImageUrl("");
-
-    // Resolve base64 video URL if stored as local IndexedDB/Firebase reference
-    if (prod.videoUrl && prod.videoUrl.startsWith("db-media://")) {
-      setProdVideoUrl("جاري التحميل...");
-      const resolved = await StorageService.resolveMediaUrl(prod.videoUrl, prod.id);
-      setProdVideoUrl(resolved || "");
-    } else {
-      setProdVideoUrl(prod.videoUrl || "");
-    }
-
+    setProdVideoUrl(prod.videoUrl || "");
     setProdCategoryId(prod.categoryId || "");
     setProdFeatured(!!prod.featured);
     setProdIsSoldOut(!!prod.isSoldOut);
@@ -294,105 +301,113 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
 
-    const imagesArray = [...prodImagesList];
-    
-    // If no images provided, use a default placeholder
-    if (imagesArray.length === 0) {
-      imagesArray.push("https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80");
+    setIsSavingProduct(true);
+    try {
+      const imagesArray = [...prodImagesList];
+      
+      // If no images provided, use a default placeholder
+      if (imagesArray.length === 0) {
+        imagesArray.push("https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80");
+      }
+
+      // Filter out rows with no options or no names
+      const formattedAttrs = prodAttrs
+        .filter((attr) => attr.name.trim().length > 0 && attr.options.length > 0)
+        .map((attr) => ({
+          name: attr.name.trim(),
+          options: attr.options.map((opt) => opt.trim()).filter((opt) => opt.length > 0)
+        }));
+
+      // Clean up colorImages & colorCodes to only keep active colors
+      const cleanedColorImages: Record<string, string> = {};
+      const cleanedColorCodes: Record<string, string> = {};
+      
+      prodColors.forEach((color) => {
+        const cleanColor = color.trim();
+        if (prodColorImages[cleanColor]) {
+          cleanedColorImages[cleanColor] = prodColorImages[cleanColor];
+        }
+        if (prodColorCodes[cleanColor]) {
+          cleanedColorCodes[cleanColor] = prodColorCodes[cleanColor];
+        }
+      });
+
+      const productId = editingProduct ? editingProduct.id : `prod-${Date.now()}`;
+      let finalVideoUrl: string | undefined = prodVideoUrl.trim() || undefined;
+
+      // Handle large base64 uploaded videos
+      if (finalVideoUrl && finalVideoUrl.startsWith("data:")) {
+        try {
+          finalVideoUrl = await StorageService.saveMedia(productId, finalVideoUrl);
+        } catch (err) {
+          console.error("Error saving uploaded video:", err);
+        }
+      } else if (!finalVideoUrl && editingProduct && editingProduct.videoUrl?.startsWith("db-media://")) {
+        // If video was cleared, delete from IndexedDB & Cloud
+        try {
+          await StorageService.deleteMedia(productId);
+        } catch (err) {
+          console.error("Error deleting video:", err);
+        }
+      }
+
+      if (editingProduct) {
+        // Modify existing product
+        const updated = products.map((p) =>
+          p.id === editingProduct.id
+            ? {
+                ...p,
+                name: prodName,
+                code: prodCode.trim() || undefined,
+                price: prodPrice,
+                originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
+                description: prodDesc,
+                images: imagesArray,
+                videoUrl: finalVideoUrl,
+                categoryId: prodCategoryId,
+                featured: prodFeatured,
+                isSoldOut: prodIsSoldOut,
+                rating: prodRating,
+                reviewsCount: prodReviews,
+                attributes: formattedAttrs,
+                colorImages: cleanedColorImages,
+                colorCodes: cleanedColorCodes,
+                colors: prodColors
+              }
+            : p
+        );
+        updateProducts(updated);
+      } else {
+        // Create new product
+        const newProd: Product = {
+          id: productId,
+          name: prodName,
+          code: prodCode.trim() || undefined,
+          price: prodPrice,
+          originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
+          description: prodDesc,
+          images: imagesArray,
+          videoUrl: finalVideoUrl,
+          categoryId: prodCategoryId,
+          featured: prodFeatured,
+          isSoldOut: prodIsSoldOut,
+          rating: prodRating,
+          reviewsCount: prodReviews,
+          attributes: formattedAttrs,
+          colorImages: cleanedColorImages,
+          colorCodes: cleanedColorCodes,
+          colors: prodColors
+        };
+        updateProducts([...products, newProd]);
+      }
+
+      setIsProductModalOpen(false);
+    } catch (error) {
+      console.error("Error submitting product:", error);
+      alert("حدث خطأ أثناء حفظ المنتج.");
+    } finally {
+      setIsSavingProduct(false);
     }
-
-    // Filter out rows with no options or no names
-    const formattedAttrs = prodAttrs
-      .filter((attr) => attr.name.trim().length > 0 && attr.options.length > 0)
-      .map((attr) => ({
-        name: attr.name.trim(),
-        options: attr.options.map((opt) => opt.trim()).filter((opt) => opt.length > 0)
-      }));
-
-    // Clean up colorImages & colorCodes to only keep active colors
-    const cleanedColorImages: Record<string, string> = {};
-    const cleanedColorCodes: Record<string, string> = {};
-    
-    prodColors.forEach((color) => {
-      const cleanColor = color.trim();
-      if (prodColorImages[cleanColor]) {
-        cleanedColorImages[cleanColor] = prodColorImages[cleanColor];
-      }
-      if (prodColorCodes[cleanColor]) {
-        cleanedColorCodes[cleanColor] = prodColorCodes[cleanColor];
-      }
-    });
-
-    const productId = editingProduct ? editingProduct.id : `prod-${Date.now()}`;
-    let finalVideoUrl: string | undefined = prodVideoUrl.trim() || undefined;
-
-    // Handle large base64 uploaded videos
-    if (finalVideoUrl && finalVideoUrl.startsWith("data:")) {
-      try {
-        finalVideoUrl = await StorageService.saveMedia(productId, finalVideoUrl);
-      } catch (err) {
-        console.error("Error saving uploaded video:", err);
-      }
-    } else if (!finalVideoUrl && editingProduct && editingProduct.videoUrl?.startsWith("db-media://")) {
-      // If video was cleared, delete from IndexedDB & Cloud
-      try {
-        await StorageService.deleteMedia(productId);
-      } catch (err) {
-        console.error("Error deleting video:", err);
-      }
-    }
-
-    if (editingProduct) {
-      // Modify existing product
-      const updated = products.map((p) =>
-        p.id === editingProduct.id
-          ? {
-              ...p,
-              name: prodName,
-              code: prodCode.trim() || undefined,
-              price: prodPrice,
-              originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
-              description: prodDesc,
-              images: imagesArray,
-              videoUrl: finalVideoUrl,
-              categoryId: prodCategoryId,
-              featured: prodFeatured,
-              isSoldOut: prodIsSoldOut,
-              rating: prodRating,
-              reviewsCount: prodReviews,
-              attributes: formattedAttrs,
-              colorImages: cleanedColorImages,
-              colorCodes: cleanedColorCodes,
-              colors: prodColors
-            }
-          : p
-      );
-      updateProducts(updated);
-    } else {
-      // Create new product
-      const newProd: Product = {
-        id: productId,
-        name: prodName,
-        code: prodCode.trim() || undefined,
-        price: prodPrice,
-        originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
-        description: prodDesc,
-        images: imagesArray,
-        videoUrl: finalVideoUrl,
-        categoryId: prodCategoryId,
-        featured: prodFeatured,
-        isSoldOut: prodIsSoldOut,
-        rating: prodRating,
-        reviewsCount: prodReviews,
-        attributes: formattedAttrs,
-        colorImages: cleanedColorImages,
-        colorCodes: cleanedColorCodes,
-        colors: prodColors
-      };
-      updateProducts([...products, newProd]);
-    }
-
-    setIsProductModalOpen(false);
   };
 
   const handleProductDelete = async (id: string) => {
@@ -3615,7 +3630,11 @@ export const AdminDashboard: React.FC = () => {
                   <input
                     type="text"
                     placeholder="رابط فيديو مباشر (https://... أو رابط YouTube / Vimeo)"
-                    value={prodVideoUrl.startsWith("data:") ? "[تم رفع فيديو من الجهاز]" : prodVideoUrl}
+                    value={
+                      prodVideoUrl.startsWith("data:") || prodVideoUrl.startsWith("db-media://")
+                        ? "[تم رفع فيديو من الجهاز]"
+                        : prodVideoUrl
+                    }
                     onChange={(e) => setProdVideoUrl(e.target.value)}
                     className="admin-input"
                     style={{ height: "38px", fontSize: "12px" }}
@@ -3644,7 +3663,13 @@ export const AdminDashboard: React.FC = () => {
                         🎬 رابط فيديو يوتيوب/فيميو (معاينة مفعلة)
                       </div>
                     ) : (
-                      <video src={prodVideoUrl} controls style={{ width: "100%", maxHeight: "180px", display: "block", backgroundColor: "#000000" }} />
+                      !resolvedVideoPreviewUrl && prodVideoUrl.startsWith("db-media://") ? (
+                        <div style={{ padding: "20px", color: "#94a3b8", fontSize: "12px", textAlign: "center", backgroundColor: "#0f172a" }}>
+                          جاري تحميل الفيديو...
+                        </div>
+                      ) : (
+                        <video src={resolvedVideoPreviewUrl} controls style={{ width: "100%", maxHeight: "180px", display: "block", backgroundColor: "#000000" }} />
+                      )
                     )}
                   </div>
                 )}
@@ -3990,11 +4015,17 @@ export const AdminDashboard: React.FC = () => {
                   onClick={() => setIsProductModalOpen(false)}
                   className="btn btn-secondary"
                   style={{ padding: "8px 20px" }}
+                  disabled={isSavingProduct}
                 >
                   إلغاء
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ padding: "8px 20px" }}>
-                  {editingProduct ? "حفظ التغييرات" : "إنشاء المنتج"}
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  style={{ padding: "8px 20px" }}
+                  disabled={isSavingProduct}
+                >
+                  {isSavingProduct ? "جاري الحفظ..." : (editingProduct ? "حفظ التغييرات" : "إنشاء المنتج")}
                 </button>
               </div>
             </form>
