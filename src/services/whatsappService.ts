@@ -45,14 +45,15 @@ export const WhatsAppService = {
     // Items
     msg += `📦 *المنتجات المحددة:* (${items.length})\n`;
     items.forEach((item, index) => {
-      // Format attributes inline like [ Volume: 100ml | Concentration: EDP ]
-      const attributes = Object.entries(item.selectedAttributes);
-      const attrsStr = attributes.length > 0
-        ? ` [ ${attributes.map(([key, val]) => `${key}: ${val}`).join(" | ")} ]`
-        : "";
+      let itemLines = `${index + 1}. *${item.name}*\n`;
       
-      msg += `${index + 1}. *${item.name}*${attrsStr}\n`;
-      msg += `   الكمية: ${item.quantity} × ${item.price.toFixed(2)} ج.م | الإجمالي: ${(item.price * item.quantity).toFixed(2)} ج.م\n`;
+      // Format attributes on new lines
+      Object.entries(item.selectedAttributes).forEach(([key, val]) => {
+        itemLines += `   - *${key}:* ${val}\n`;
+      });
+      
+      itemLines += `   الكمية: ${item.quantity} × ${item.price.toFixed(2)} ج.م | الإجمالي: ${(item.price * item.quantity).toFixed(2)} ج.م\n`;
+      msg += itemLines;
     });
     msg += `\n`;
     msg += `${divider}\n`;
