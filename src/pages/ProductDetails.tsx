@@ -5,8 +5,35 @@ import { useLanguage } from "../context/LanguageContext";
 import { Star, Heart, ShoppingCart, ArrowLeft, Zap, Video } from "lucide-react";
 import { getAdjustedPrice } from "../utils/price";
 
+const getFallbackColorHex = (colorName: string): string => {
+  const colors: Record<string, string> = {
+    "أسود": "#000000",
+    "أبيض": "#ffffff",
+    "أحمر": "#dc2626",
+    "أزرق": "#2563eb",
+    "أخضر": "#16a34a",
+    "أصفر": "#facc15",
+    "بني": "#78350f",
+    "رمادي": "#4b5563",
+    "كحلي": "#1e3a8a",
+    "زيتي": "#3f6212",
+    "بيج": "#f5f5dc",
+    "وردي": "#db2777",
+    "بنفسجي": "#7c3aed",
+    "برتقالي": "#f97316",
+    "ذهبي": "#d97706",
+    "فضي": "#cbd5e1"
+  };
+  for (const key of Object.keys(colors)) {
+    if (colorName.includes(key)) {
+      return colors[key];
+    }
+  }
+  return "#e2e8f0"; // slate-200 default fallback
+};
+
 export const ProductDetails: React.FC = () => {
-  const { selectedProductId, products, categories, setCurrentView, setActiveCategorySlug } = useStore();
+  const { selectedProductId, products, categories, setCurrentView, setActiveCategorySlug, theme } = useStore();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { t } = useLanguage();
 
@@ -278,22 +305,70 @@ export const ProductDetails: React.FC = () => {
           <p className="details-desc">{product.description || "لا يوجد وصف متوفر لهذا المنتج حالياً."}</p>
 
           {/* Dynamic Attributes Selector */}
-          {prodAttributes.map((attr) => (
-            <div key={attr.name || Math.random()} className="attribute-selector">
-              <span className="attribute-label">اختر {attr.name}:</span>
-              <div className="attribute-options">
-                {Array.isArray(attr.options) && attr.options.map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => handleAttrClick(attr.name, opt)}
-                    className={`attr-btn ${selectedAttrs[attr.name] === opt ? "selected" : ""}`}
-                  >
-                    {opt}
-                  </button>
-                ))}
+          {prodAttributes.map((attr) => {
+            const isColorAttr = attr.name === "اللون" || attr.name.toLowerCase() === "color";
+            return (
+              <div key={attr.name || Math.random()} className="attribute-selector">
+                <span className="attribute-label">
+                  اختر {attr.name}: <span style={{ fontWeight: "700", color: "var(--primary-color)" }}>{selectedAttrs[attr.name] || ""}</span>
+                </span>
+                <div className="attribute-options" style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "8px" }}>
+                  {Array.isArray(attr.options) && attr.options.map((opt) => {
+                    if (isColorAttr) {
+                      const hex = (theme.colorSwatches && theme.colorSwatches[opt]) || getFallbackColorHex(opt);
+                      const isSelected = selectedAttrs[attr.name] === opt;
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => handleAttrClick(attr.name, opt)}
+                          className={`color-swatch-btn ${isSelected ? "selected" : ""}`}
+                          style={{
+                            width: "36px",
+                            height: "36px",
+                            borderRadius: "50%",
+                            backgroundColor: hex,
+                            border: isSelected ? "2.5px solid var(--primary-color)" : "1px solid var(--border-color)",
+                            outline: isSelected ? "2px solid #ffffff" : "none",
+                            outlineOffset: "-4px",
+                            cursor: "pointer",
+                            boxShadow: isSelected ? "0 4px 10px rgba(0,0,0,0.3)" : "0 2px 4px rgba(0,0,0,0.05)",
+                            transform: isSelected ? "scale(1.1)" : "scale(1)",
+                            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                            position: "relative"
+                          }}
+                          title={opt}
+                        >
+                          {/* Visual checkmark or white indicator for selected color */}
+                          {isSelected && (
+                            <span style={{
+                              position: "absolute",
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: opt === "أبيض" || hex === "#ffffff" ? "#000000" : "#ffffff",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)"
+                            }} />
+                          )}
+                        </button>
+                      );
+                    }
+                    return (
+                      <button
+                        key={opt}
+                        onClick={() => handleAttrClick(attr.name, opt)}
+                        className={`attr-btn ${selectedAttrs[attr.name] === opt ? "selected" : ""}`}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Quantity and Actions */}
           <div className="quantity-add-wrapper">
