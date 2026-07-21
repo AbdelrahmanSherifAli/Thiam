@@ -5,6 +5,65 @@ import { useLanguage } from "../context/LanguageContext";
 import { Star, Heart, ShoppingCart, ArrowLeft, Zap, Video } from "lucide-react";
 import { getAdjustedPrice } from "../utils/price";
 
+const getFallbackColor = (colorName: string): string => {
+  const name = colorName.trim().toLowerCase();
+  const maps: Record<string, string> = {
+    "أحمر": "#ef4444",
+    "احمر": "#ef4444",
+    "red": "#ef4444",
+    "أزرق": "#3b82f6",
+    "ازرق": "#3b82f6",
+    "blue": "#3b82f6",
+    "أخضر": "#10b981",
+    "اخضر": "#10b981",
+    "green": "#10b981",
+    "أسود": "#111827",
+    "اسود": "#111827",
+    "black": "#111827",
+    "أبيض": "#ffffff",
+    "ابيض": "#ffffff",
+    "white": "#ffffff",
+    "أصفر": "#f59e0b",
+    "اصفر": "#f59e0b",
+    "yellow": "#f59e0b",
+    "رمادي": "#6b7280",
+    "gray": "#6b7280",
+    "grey": "#6b7280",
+    "بني": "#78350f",
+    "brown": "#78350f",
+    "وردي": "#ec4899",
+    "بمبي": "#ec4899",
+    "pink": "#ec4899",
+    "كحلي": "#1e3a8a",
+    "navy": "#1e3a8a",
+    "بنفسجي": "#8b5cf6",
+    "purple": "#8b5cf6",
+    "بيج": "#f5f5dc",
+    "beige": "#f5f5dc",
+    "ذهبي": "#d4af37",
+    "gold": "#d4af37",
+    "فضي": "#c0c0c0",
+    "silver": "#c0c0c0",
+    "برتقالي": "#f97316",
+    "orange": "#f97316",
+    "فسفوري": "#ccff00",
+    "رصاصي": "#a1a1aa",
+    "جنزاري": "#008080",
+    "زيتي": "#556b2f"
+  };
+  return maps[name] || "#cccccc";
+};
+
+const isLightColor = (hex: string): boolean => {
+  const color = hex.replace("#", "");
+  const r = parseInt(color.substring(0, 2), 16);
+  const g = parseInt(color.substring(2, 4), 16);
+  const b = parseInt(color.substring(4, 6), 16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return true;
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 180;
+};
+
 export const ProductDetails: React.FC = () => {
   const { selectedProductId, products, categories, setCurrentView, setActiveCategorySlug } = useStore();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
@@ -43,6 +102,19 @@ export const ProductDetails: React.FC = () => {
       setQuantity(1);
       
       const defaults: Record<string, string> = {};
+      
+      // Seed default built-in color
+      if (product.colors && product.colors.length > 0) {
+        defaults["اللون"] = product.colors[0];
+        
+        // Also update initial active image if first color has a mapped image
+        const firstColor = product.colors[0].trim();
+        const firstColorImage = product.colorImages?.[firstColor];
+        if (firstColorImage) {
+          setActiveImage(firstColorImage);
+        }
+      }
+      
       prodAttributes.forEach((attr) => {
         if (attr && attr.name && Array.isArray(attr.options) && attr.options.length > 0) {
           defaults[attr.name] = attr.options[0];
@@ -89,8 +161,16 @@ export const ProductDetails: React.FC = () => {
 
   const handleAddToCart = () => {
     if (product.isSoldOut) return;
-    // Verify all attributes are selected
+    
+    // Verify all dynamic attributes are selected
     const missing = prodAttributes.filter((attr) => attr.name && !selectedAttrs[attr.name]);
+    
+    // Check built-in colors as well
+    if (product.colors && product.colors.length > 0 && !selectedAttrs["اللون"]) {
+      alert("يرجى اختيار اللون");
+      return;
+    }
+    
     if (missing.length > 0) {
       alert(`يرجى اختيار الخيارات لـ: ${missing.map((m) => m.name).join(", ")}`);
       return;
@@ -103,7 +183,15 @@ export const ProductDetails: React.FC = () => {
 
   const handleBuyNow = () => {
     if (product.isSoldOut) return;
+    
     const missing = prodAttributes.filter((attr) => attr.name && !selectedAttrs[attr.name]);
+    
+    // Check built-in colors as well
+    if (product.colors && product.colors.length > 0 && !selectedAttrs["اللون"]) {
+      alert("يرجى اختيار اللون");
+      return;
+    }
+    
     if (missing.length > 0) {
       alert(`${t("product_select_required")}: ${missing.map((m) => m.name).join(", ")}`);
       return;
@@ -292,23 +380,82 @@ export const ProductDetails: React.FC = () => {
           {/* Long Description */}
           <p className="details-desc">{product.description || "لا يوجد وصف متوفر لهذا المنتج حالياً."}</p>
 
-          {/* Dynamic Attributes Selector */}
-          {prodAttributes.map((attr) => (
-            <div key={attr.name || Math.random()} className="attribute-selector">
-              <span className="attribute-label">اختر {attr.name}:</span>
-              <div className="attribute-options">
-                {Array.isArray(attr.options) && attr.options.map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => handleAttrClick(attr.name, opt)}
-                    className={`attr-btn ${selectedAttrs[attr.name] === opt ? "selected" : ""}`}
-                  >
-                    {opt}
-                  </button>
-                ))}
+          {/* Built-in Colors Selector */}
+          {product.colors && product.colors.length > 0 && (
+            <div className="attribute-selector">
+              <span className="attribute-label">
+                اختر اللون:{" "}
+                {selectedAttrs["اللون"] && (
+                  <strong style={{ color: "var(--primary-color)", marginInlineStart: "5px" }}>
+                    {selectedAttrs["اللون"]}
+                  </strong>
+                )}
+              </span>
+              <div className="attribute-options" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                {product.colors.map((color) => {
+                  const cleanOpt = color.trim();
+                  const colorHex = product.colorCodes?.[cleanOpt] || getFallbackColor(cleanOpt);
+                  const isSelected = selectedAttrs["اللون"] === color;
+                  const checkmarkColor = isLightColor(colorHex) ? "#000000" : "#ffffff";
+                  
+                  return (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => handleAttrClick("اللون", color)}
+                      className={`color-swatch-btn ${isSelected ? "selected" : ""}`}
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        borderRadius: "50%",
+                        backgroundColor: colorHex,
+                        border: isSelected ? "3px solid var(--primary-color)" : "1px solid var(--border-color)",
+                        cursor: "pointer",
+                        position: "relative",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxShadow: isSelected ? "0 4px 10px rgba(0,0,0,0.15)" : "none",
+                        transition: "all 0.2s ease"
+                      }}
+                      title={color}
+                    >
+                      {isSelected && (
+                        <span style={{ color: checkmarkColor, fontSize: "12px", fontWeight: "bold" }}>✓</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          ))}
+          )}
+
+          {/* Dynamic Attributes Selector */}
+          {prodAttributes
+            .filter((attr) => {
+              const isColorName =
+                attr.name.trim() === "اللون" ||
+                attr.name.toLowerCase().trim() === "color" ||
+                attr.name.trim() === "الوان" ||
+                attr.name.trim() === "الألوان";
+              return !isColorName;
+            })
+            .map((attr) => (
+              <div key={attr.name || Math.random()} className="attribute-selector">
+                <span className="attribute-label">اختر {attr.name}:</span>
+                <div className="attribute-options">
+                  {Array.isArray(attr.options) && attr.options.map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => handleAttrClick(attr.name, opt)}
+                      className={`attr-btn ${selectedAttrs[attr.name] === opt ? "selected" : ""}`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
 
           {/* Quantity and Actions */}
           <div className="quantity-add-wrapper">

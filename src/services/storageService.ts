@@ -68,6 +68,8 @@ export interface Product {
   rating: number;
   reviewsCount: number;
   colorImages?: Record<string, string>; // Optional map of color names to specific images
+  colorCodes?: Record<string, string>; // Optional map of color names to HEX codes
+  colors?: string[]; // Optional list of available colors
 }
 
 export interface Category {

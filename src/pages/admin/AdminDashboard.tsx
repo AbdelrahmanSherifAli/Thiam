@@ -90,6 +90,9 @@ export const AdminDashboard: React.FC = () => {
   // Dynamic Attributes builder
   const [prodAttrs, setProdAttrs] = useState<{ name: string; options: string[]; tempOption?: string; tempOptionPrice?: string }[]>([]);
   const [prodColorImages, setProdColorImages] = useState<Record<string, string>>({});
+  const [prodColorCodes, setProdColorCodes] = useState<Record<string, string>>({});
+  const [prodColors, setProdColors] = useState<string[]>([]);
+  const [tempColorName, setTempColorName] = useState("");
 
   // --- Form State: Categories ---
   const [catName, setCatName] = useState("");
@@ -238,6 +241,9 @@ export const AdminDashboard: React.FC = () => {
     setProdReviews(5);
     setProdAttrs([]);
     setProdColorImages({});
+    setProdColorCodes({});
+    setProdColors([]);
+    setTempColorName("");
     setIsProductModalOpen(true);
   };
 
@@ -257,6 +263,9 @@ export const AdminDashboard: React.FC = () => {
     setProdRating(prod.rating || 5);
     setProdReviews(prod.reviewsCount || 0);
     setProdColorImages(prod.colorImages || {});
+    setProdColorCodes(prod.colorCodes || {});
+    setProdColors(prod.colors || []);
+    setTempColorName("");
     
     const attrs = Array.isArray(prod.attributes) ? prod.attributes : [];
     setProdAttrs(
@@ -291,19 +300,17 @@ export const AdminDashboard: React.FC = () => {
         options: attr.options.map((opt) => opt.trim()).filter((opt) => opt.length > 0)
       }));
 
-    // Clean up colorImages to only keep active color options
-    const colorAttr = formattedAttrs.find(
-      (attr) =>
-        attr.name === "اللون" ||
-        attr.name.toLowerCase() === "color" ||
-        attr.name === "الوان" ||
-        attr.name === "الألوان"
-    );
-    const activeColors = colorAttr ? colorAttr.options.map((opt) => opt.split(" (+")[0].trim()) : [];
+    // Clean up colorImages & colorCodes to only keep active colors
     const cleanedColorImages: Record<string, string> = {};
-    activeColors.forEach((color) => {
-      if (prodColorImages[color]) {
-        cleanedColorImages[color] = prodColorImages[color];
+    const cleanedColorCodes: Record<string, string> = {};
+    
+    prodColors.forEach((color) => {
+      const cleanColor = color.trim();
+      if (prodColorImages[cleanColor]) {
+        cleanedColorImages[cleanColor] = prodColorImages[cleanColor];
+      }
+      if (prodColorCodes[cleanColor]) {
+        cleanedColorCodes[cleanColor] = prodColorCodes[cleanColor];
       }
     });
 
@@ -326,7 +333,9 @@ export const AdminDashboard: React.FC = () => {
               rating: prodRating,
               reviewsCount: prodReviews,
               attributes: formattedAttrs,
-              colorImages: cleanedColorImages
+              colorImages: cleanedColorImages,
+              colorCodes: cleanedColorCodes,
+              colors: prodColors
             }
           : p
       );
@@ -348,7 +357,9 @@ export const AdminDashboard: React.FC = () => {
         rating: prodRating,
         reviewsCount: prodReviews,
         attributes: formattedAttrs,
-        colorImages: cleanedColorImages
+        colorImages: cleanedColorImages,
+        colorCodes: cleanedColorCodes,
+        colors: prodColors
       };
       updateProducts([...products, newProd]);
     }
@@ -3615,6 +3626,174 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
+              {/* Product Colors Manager (Fixed & Built-in) */}
+              <div className="admin-form-group" style={{ border: "1px solid var(--border-color)", padding: "18px", borderRadius: "var(--border-radius)", backgroundColor: "#f8fafc", marginBottom: "20px" }}>
+                <span className="admin-label" style={{ fontSize: "14px", fontWeight: "700", display: "block", marginBottom: "4px" }}>خيارات ألوان المنتج (اختياري)</span>
+                <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginBottom: "15px" }}>قم بإضافة الألوان وتحديد درجاتها ورفع صور مخصصة لها هنا.</span>
+                
+                {/* Input row to add new color */}
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "15px" }}>
+                  <input
+                    type="text"
+                    placeholder="اسم اللون الجديد (مثال: أحمر)"
+                    value={tempColorName}
+                    onChange={(e) => setTempColorName(e.target.value)}
+                    className="admin-input"
+                    style={{ height: "38px", flex: 1 }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const val = tempColorName.trim();
+                        if (val && !prodColors.includes(val)) {
+                          setProdColors([...prodColors, val]);
+                          setTempColorName("");
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = tempColorName.trim();
+                      if (val && !prodColors.includes(val)) {
+                        setProdColors([...prodColors, val]);
+                        setTempColorName("");
+                      }
+                    }}
+                    className="btn btn-secondary"
+                    style={{ height: "38px", padding: "0 16px", fontSize: "12px", whiteSpace: "nowrap" }}
+                  >
+                    إضافة لون
+                  </button>
+                </div>
+
+                {/* List of added colors */}
+                {prodColors.length > 0 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {prodColors.map((color) => {
+                      const cleanColor = color.trim();
+                      return (
+                        <div key={color} style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "#ffffff", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                          {/* Color Picker & Name */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: "150px" }}>
+                            <input
+                              type="color"
+                              value={prodColorCodes[cleanColor] || "#cccccc"}
+                              onChange={(e) => {
+                                setProdColorCodes(prev => ({
+                                  ...prev,
+                                  [cleanColor]: e.target.value
+                                }));
+                              }}
+                              style={{
+                                width: "28px",
+                                height: "28px",
+                                border: "1px solid var(--border-color)",
+                                borderRadius: "50%",
+                                cursor: "pointer",
+                                padding: 0,
+                                backgroundColor: "transparent",
+                                overflow: "hidden"
+                              }}
+                              title="تحديد درجة اللون"
+                            />
+                            <span style={{ fontSize: "12px", fontWeight: "600" }}>{cleanColor}</span>
+                          </div>
+
+                          {/* Image upload section */}
+                          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "10px" }}>
+                            {prodColorImages[cleanColor] ? (
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%" }}>
+                                <img
+                                  src={prodColorImages[cleanColor]}
+                                  alt={cleanColor}
+                                  style={{ width: "36px", height: "36px", objectFit: "cover", borderRadius: "4px", border: "1px solid var(--border-color)" }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setProdColorImages(prev => {
+                                      const copy = { ...prev };
+                                      delete copy[cleanColor];
+                                      return copy;
+                                    });
+                                  }}
+                                  className="btn btn-secondary"
+                                  style={{ padding: "4px 8px", fontSize: "11px", color: "#ef4444", borderColor: "#fca5a5", height: "auto" }}
+                                >
+                                  إزالة الصورة
+                                </button>
+                              </div>
+                            ) : (
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%" }}>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const compressed = await compressImage(file);
+                                      if (compressed) {
+                                        setProdColorImages(prev => ({
+                                          ...prev,
+                                          [cleanColor]: compressed
+                                        }));
+                                      }
+                                    }
+                                  }}
+                                  id={`color-built-img-${cleanColor}`}
+                                  style={{ display: "none" }}
+                                />
+                                <label
+                                  htmlFor={`color-built-img-${cleanColor}`}
+                                  className="btn btn-secondary"
+                                  style={{ padding: "6px 12px", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", margin: 0, height: "auto" }}
+                                >
+                                  <Upload size={12} />
+                                  <span>رفع صورة</span>
+                                </label>
+
+                                <input
+                                  type="text"
+                                  placeholder="أو أدخل رابطاً يدوياً..."
+                                  className="admin-input"
+                                  style={{ height: "30px", fontSize: "11px", flex: 1 }}
+                                  value={prodColorImages[cleanColor] || ""}
+                                  onChange={(e) => {
+                                    setProdColorImages(prev => ({
+                                      ...prev,
+                                      [cleanColor]: e.target.value
+                                    }));
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Delete Color Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setProdColors(prodColors.filter((c) => c !== color));
+                            }}
+                            style={{
+                              backgroundColor: "transparent",
+                              border: "none",
+                              color: "#ef4444",
+                              cursor: "pointer",
+                              padding: "4px"
+                            }}
+                            title="حذف اللون"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Attributes Builder */}
               <div className="admin-form-group">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
@@ -3771,106 +3950,6 @@ export const AdminDashboard: React.FC = () => {
                   )}
                 </div>
 
-                {/* Color-specific Images Mapping Section */}
-                {(() => {
-                  const colorAttr = prodAttrs.find(
-                    (attr) =>
-                      attr.name.trim() === "اللون" ||
-                      attr.name.toLowerCase().trim() === "color" ||
-                      attr.name.trim() === "الوان" ||
-                      attr.name.trim() === "الألوان"
-                  );
-                  if (!colorAttr || colorAttr.options.length === 0) return null;
-                  return (
-                    <div style={{ marginTop: "20px", borderTop: "1px dashed var(--border-color)", paddingTop: "15px" }}>
-                      <h4 style={{ fontSize: "13px", fontWeight: "700", marginBottom: "8px", color: "var(--primary-color)" }}>
-                        صور خيارات الألوان (اختياري)
-                      </h4>
-                      <p style={{ fontSize: "11px", color: "var(--secondary-color)", marginBottom: "12px" }}>
-                        يمكنك رفع صورة لكل لون ليتم عرضها تلقائياً للعميل عند اختيار اللون.
-                      </p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        {colorAttr.options.map((opt) => {
-                          const cleanOpt = opt.split(" (+")[0].trim();
-                          return (
-                            <div key={opt} style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-                              <span style={{ fontSize: "12px", fontWeight: "600", minWidth: "120px" }}>{cleanOpt}</span>
-                              
-                              {prodColorImages[cleanOpt] ? (
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
-                                  <img 
-                                    src={prodColorImages[cleanOpt]} 
-                                    alt={cleanOpt} 
-                                    style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px", border: "1px solid var(--border-color)" }} 
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setProdColorImages(prev => {
-                                        const copy = { ...prev };
-                                        delete copy[cleanOpt];
-                                        return copy;
-                                      });
-                                    }}
-                                    className="btn btn-secondary"
-                                    style={{ padding: "4px 8px", fontSize: "11px", color: "#ef4444", borderColor: "#fca5a5", height: "auto" }}
-                                  >
-                                    إزالة الصورة
-                                  </button>
-                                </div>
-                              ) : (
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={async (e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        const compressed = await compressImage(file);
-                                        if (compressed) {
-                                          setProdColorImages(prev => ({
-                                            ...prev,
-                                            [cleanOpt]: compressed
-                                          }));
-                                        }
-                                      }
-                                    }}
-                                    id={`color-img-upload-${cleanOpt}`}
-                                    style={{ display: "none" }}
-                                  />
-                                  <label
-                                    htmlFor={`color-img-upload-${cleanOpt}`}
-                                    className="btn btn-secondary"
-                                    style={{ padding: "6px 12px", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", margin: 0, height: "auto" }}
-                                  >
-                                    <Upload size={12} />
-                                    <span>رفع صورة</span>
-                                  </label>
-
-                                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>أو أدخل رابطاً يدوياً:</span>
-                                  <input
-                                    type="text"
-                                    placeholder="رابط الصورة"
-                                    className="admin-input"
-                                    style={{ height: "30px", fontSize: "12px", flex: 1 }}
-                                    value={prodColorImages[cleanOpt] || ""}
-                                    onChange={(e) => {
-                                      setProdColorImages(prev => ({
-                                        ...prev,
-                                        [cleanOpt]: e.target.value
-                                      }));
-                                    }}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
 
               <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "30px", paddingTop: "15px", borderTop: "1px solid #e2e8f0" }}>
                 <button
