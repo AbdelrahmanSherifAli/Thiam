@@ -3949,7 +3949,7 @@ export const AdminDashboard: React.FC = () => {
                     ))
                   )}
                 </div>
-
+              </div>
 
               <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "30px", paddingTop: "15px", borderTop: "1px solid #e2e8f0" }}>
                 <button
