@@ -45,7 +45,6 @@ export interface ThemeConfig {
   layoutStyle?: "luxury" | "modern" | "editorial";
   announcementText?: string;
   announcementEnabled?: boolean;
-  colorSwatches?: Record<string, string>; // mapping: colorName -> hexCode
 }
 
 export interface ProductAttribute {
@@ -68,6 +67,7 @@ export interface Product {
   isSoldOut?: boolean; // Out of stock indicator
   rating: number;
   reviewsCount: number;
+  colorImages?: Record<string, string>; // Optional map of color names to specific images
 }
 
 export interface Category {
@@ -200,24 +200,7 @@ const DEFAULT_THEME: ThemeConfig = {
   },
   layoutStyle: "modern",
   announcementText: "⚡ خصم 15% على جميع المكملات وأدوات الجيم بمناسبة الموسم الرياضي! استخدم كود الخصم: GYM15 ⚡",
-  announcementEnabled: true,
-  colorSwatches: {
-    "أسود": "#000000",
-    "أسود ملكي": "#111111",
-    "أبيض": "#ffffff",
-    "أحمر": "#dc2626",
-    "أزرق": "#2563eb",
-    "أخضر": "#16a34a",
-    "أصفر": "#facc15",
-    "بني": "#78350f",
-    "بني جلد طبيعي": "#8b5a2b",
-    "رمادي": "#4b5563",
-    "كحلي": "#1e3a8a",
-    "زيتي": "#3f6212",
-    "بيج": "#f5f5dc",
-    "وردي": "#db2777",
-    "بنفسجي": "#7c3aed"
-  }
+  announcementEnabled: true
 };
 
 const DEFAULT_CATEGORIES: Category[] = [

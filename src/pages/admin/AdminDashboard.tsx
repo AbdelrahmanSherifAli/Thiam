@@ -89,9 +89,7 @@ export const AdminDashboard: React.FC = () => {
   const [prodReviews, setProdReviews] = useState(10);
   // Dynamic Attributes builder
   const [prodAttrs, setProdAttrs] = useState<{ name: string; options: string[]; tempOption?: string; tempOptionPrice?: string }[]>([]);
-  // Color Swatches presets builder
-  const [newSwatchName, setNewSwatchName] = useState("");
-  const [newSwatchHex, setNewSwatchHex] = useState("#000000");
+  const [prodColorImages, setProdColorImages] = useState<Record<string, string>>({});
 
   // --- Form State: Categories ---
   const [catName, setCatName] = useState("");
@@ -239,6 +237,7 @@ export const AdminDashboard: React.FC = () => {
     setProdRating(5.0);
     setProdReviews(5);
     setProdAttrs([]);
+    setProdColorImages({});
     setIsProductModalOpen(true);
   };
 
@@ -257,6 +256,7 @@ export const AdminDashboard: React.FC = () => {
     setProdIsSoldOut(!!prod.isSoldOut);
     setProdRating(prod.rating || 5);
     setProdReviews(prod.reviewsCount || 0);
+    setProdColorImages(prod.colorImages || {});
     
     const attrs = Array.isArray(prod.attributes) ? prod.attributes : [];
     setProdAttrs(
@@ -291,6 +291,22 @@ export const AdminDashboard: React.FC = () => {
         options: attr.options.map((opt) => opt.trim()).filter((opt) => opt.length > 0)
       }));
 
+    // Clean up colorImages to only keep active color options
+    const colorAttr = formattedAttrs.find(
+      (attr) =>
+        attr.name === "اللون" ||
+        attr.name.toLowerCase() === "color" ||
+        attr.name === "الوان" ||
+        attr.name === "الألوان"
+    );
+    const activeColors = colorAttr ? colorAttr.options.map((opt) => opt.split(" (+")[0].trim()) : [];
+    const cleanedColorImages: Record<string, string> = {};
+    activeColors.forEach((color) => {
+      if (prodColorImages[color]) {
+        cleanedColorImages[color] = prodColorImages[color];
+      }
+    });
+
     if (editingProduct) {
       // Modify existing product
       const updated = products.map((p) =>
@@ -309,7 +325,8 @@ export const AdminDashboard: React.FC = () => {
               isSoldOut: prodIsSoldOut,
               rating: prodRating,
               reviewsCount: prodReviews,
-              attributes: formattedAttrs
+              attributes: formattedAttrs,
+              colorImages: cleanedColorImages
             }
           : p
       );
@@ -330,7 +347,8 @@ export const AdminDashboard: React.FC = () => {
         isSoldOut: prodIsSoldOut,
         rating: prodRating,
         reviewsCount: prodReviews,
-        attributes: formattedAttrs
+        attributes: formattedAttrs,
+        colorImages: cleanedColorImages
       };
       updateProducts([...products, newProd]);
     }
@@ -2889,165 +2907,6 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Product Color Swatches Customizer Card */}
-              <div className="form-card" style={{ gridColumn: "span 2", marginTop: "20px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "10px" }}>
-                  تخصيص درجات ألوان المنتجات (Color Swatches)
-                </h3>
-                <div className="admin-title-desc" style={{ marginBottom: "20px" }}>
-                  هنا يمكنك ربط أسماء الألوان التي تكتبها في مواصفات المنتجات (مثل: أسود ملكي، زيتي، كحلي، بني جلد طبيعي) بدرجات ألوان بصرية لتظهر للعملاء كدوائر ملونة رائعة بدلاً من أزرار نصوص عادية.
-                </div>
-
-                {/* Color swatches map grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "15px", marginBottom: "25px" }}>
-                  {Object.entries(theme.colorSwatches || {}).length === 0 ? (
-                    <div style={{ gridColumn: "span 12", textAlign: "center", color: "#94a3b8", fontStyle: "italic", fontSize: "13px", padding: "20px 0" }}>
-                      لا توجد درجات ألوان مخصصة بعد. سيتم استخدام الألوان التلقائية الافتراضية.
-                    </div>
-                  ) : (
-                    Object.entries(theme.colorSwatches || {}).map(([name, hex]) => (
-                      <div key={name} style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "10px 12px",
-                        border: "1px solid var(--border-color)",
-                        borderRadius: "var(--border-radius)",
-                        backgroundColor: "#f8fafc"
-                      }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <div style={{
-                            width: "24px",
-                            height: "24px",
-                            borderRadius: "50%",
-                            backgroundColor: hex,
-                            border: "1px solid #cbd5e1",
-                            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)"
-                          }} />
-                          <span style={{ fontSize: "13px", fontWeight: "600", color: "var(--primary-color)" }}>{name}</span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          {/* Native color input to edit existing color mapping */}
-                          <div style={{ position: "relative", width: "20px", height: "20px", borderRadius: "50%", overflow: "hidden", cursor: "pointer", border: "1px solid #cbd5e1" }}>
-                            <input
-                              type="color"
-                              value={hex}
-                              onChange={(e) => {
-                                const updatedSwatches = { ...(theme.colorSwatches || {}) };
-                                updatedSwatches[name] = e.target.value;
-                                updateTheme({ ...theme, colorSwatches: updatedSwatches });
-                              }}
-                              style={{
-                                position: "absolute",
-                                top: "-5px",
-                                left: "-5px",
-                                width: "30px",
-                                height: "30px",
-                                border: "none",
-                                cursor: "pointer",
-                                padding: 0
-                              }}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updatedSwatches = { ...(theme.colorSwatches || {}) };
-                              delete updatedSwatches[name];
-                              updateTheme({ ...theme, colorSwatches: updatedSwatches });
-                            }}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              color: "#ef4444",
-                              cursor: "pointer",
-                              fontSize: "14px",
-                              display: "flex",
-                              alignItems: "center",
-                              padding: "4px"
-                            }}
-                            title="حذف هذا اللون"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Add new swatch form */}
-                <div style={{
-                  display: "flex",
-                  gap: "15px",
-                  alignItems: "flex-end",
-                  borderTop: "1px dashed var(--border-color)",
-                  paddingTop: "20px",
-                  flexWrap: "wrap"
-                }}>
-                  <div style={{ flex: 1, minWidth: "200px" }}>
-                    <label className="admin-label" style={{ fontSize: "12px", marginBottom: "6px" }}>اسم اللون (مثال: زيتي، كحلي، بني جلد طبيعي):</label>
-                    <input
-                      type="text"
-                      placeholder="اكتب اسم اللون المطابق تماماً لمواصفات المنتج..."
-                      value={newSwatchName}
-                      onChange={(e) => setNewSwatchName(e.target.value)}
-                      className="admin-input"
-                      style={{ height: "38px" }}
-                    />
-                  </div>
-                  <div>
-                    <label className="admin-label" style={{ fontSize: "12px", marginBottom: "6px" }}>درجة اللون (Hex):</label>
-                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                      <input
-                        type="color"
-                        value={newSwatchHex}
-                        onChange={(e) => setNewSwatchHex(e.target.value)}
-                        style={{
-                          width: "38px",
-                          height: "38px",
-                          border: "1px solid var(--border-color)",
-                          borderRadius: "6px",
-                          padding: "2px",
-                          cursor: "pointer",
-                          backgroundColor: "transparent"
-                        }}
-                      />
-                      <input
-                        type="text"
-                        value={newSwatchHex}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setNewSwatchHex(val);
-                        }}
-                        placeholder="#000000"
-                        className="admin-input"
-                        style={{ height: "38px", width: "95px", textAlign: "center", textTransform: "uppercase" }}
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const name = newSwatchName.trim();
-                      if (!name) {
-                        alert("يرجى إدخال اسم اللون أولاً.");
-                        return;
-                      }
-                      const updatedSwatches = { ...(theme.colorSwatches || {}) };
-                      updatedSwatches[name] = newSwatchHex;
-                      updateTheme({ ...theme, colorSwatches: updatedSwatches });
-                      setNewSwatchName("");
-                      setNewSwatchHex("#000000");
-                    }}
-                    className="btn btn-primary"
-                    style={{ height: "38px", padding: "0 20px" }}
-                  >
-                    + ربط درجة اللون
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -3911,6 +3770,106 @@ export const AdminDashboard: React.FC = () => {
                     ))
                   )}
                 </div>
+
+                {/* Color-specific Images Mapping Section */}
+                {(() => {
+                  const colorAttr = prodAttrs.find(
+                    (attr) =>
+                      attr.name.trim() === "اللون" ||
+                      attr.name.toLowerCase().trim() === "color" ||
+                      attr.name.trim() === "الوان" ||
+                      attr.name.trim() === "الألوان"
+                  );
+                  if (!colorAttr || colorAttr.options.length === 0) return null;
+                  return (
+                    <div style={{ marginTop: "20px", borderTop: "1px dashed var(--border-color)", paddingTop: "15px" }}>
+                      <h4 style={{ fontSize: "13px", fontWeight: "700", marginBottom: "8px", color: "var(--primary-color)" }}>
+                        صور خيارات الألوان (اختياري)
+                      </h4>
+                      <p style={{ fontSize: "11px", color: "var(--secondary-color)", marginBottom: "12px" }}>
+                        يمكنك رفع صورة لكل لون ليتم عرضها تلقائياً للعميل عند اختيار اللون.
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        {colorAttr.options.map((opt) => {
+                          const cleanOpt = opt.split(" (+")[0].trim();
+                          return (
+                            <div key={opt} style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+                              <span style={{ fontSize: "12px", fontWeight: "600", minWidth: "120px" }}>{cleanOpt}</span>
+                              
+                              {prodColorImages[cleanOpt] ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+                                  <img 
+                                    src={prodColorImages[cleanOpt]} 
+                                    alt={cleanOpt} 
+                                    style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px", border: "1px solid var(--border-color)" }} 
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setProdColorImages(prev => {
+                                        const copy = { ...prev };
+                                        delete copy[cleanOpt];
+                                        return copy;
+                                      });
+                                    }}
+                                    className="btn btn-secondary"
+                                    style={{ padding: "4px 8px", fontSize: "11px", color: "#ef4444", borderColor: "#fca5a5", height: "auto" }}
+                                  >
+                                    إزالة الصورة
+                                  </button>
+                                </div>
+                              ) : (
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        const compressed = await compressImage(file);
+                                        if (compressed) {
+                                          setProdColorImages(prev => ({
+                                            ...prev,
+                                            [cleanOpt]: compressed
+                                          }));
+                                        }
+                                      }
+                                    }}
+                                    id={`color-img-upload-${cleanOpt}`}
+                                    style={{ display: "none" }}
+                                  />
+                                  <label
+                                    htmlFor={`color-img-upload-${cleanOpt}`}
+                                    className="btn btn-secondary"
+                                    style={{ padding: "6px 12px", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", margin: 0, height: "auto" }}
+                                  >
+                                    <Upload size={12} />
+                                    <span>رفع صورة</span>
+                                  </label>
+
+                                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>أو أدخل رابطاً يدوياً:</span>
+                                  <input
+                                    type="text"
+                                    placeholder="رابط الصورة"
+                                    className="admin-input"
+                                    style={{ height: "30px", fontSize: "12px", flex: 1 }}
+                                    value={prodColorImages[cleanOpt] || ""}
+                                    onChange={(e) => {
+                                      setProdColorImages(prev => ({
+                                        ...prev,
+                                        [cleanOpt]: e.target.value
+                                      }));
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "30px", paddingTop: "15px", borderTop: "1px solid #e2e8f0" }}>
