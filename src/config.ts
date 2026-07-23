@@ -6,7 +6,7 @@ export const CLOUD_CONFIG = {
   // رابط قاعدة بيانات فايربيس (Firebase Realtime Database REST API URL)
   // يرجى إنشاء قاعدة بيانات مجانية على Firebase وتفعيل القراءة والكتابة، ثم وضع الرابط هنا.
   // مثال: "https://my-store-12345-default-rtdb.firebaseio.com"
-  databaseUrl: "https://thiam-da6cc-default-rtdb.firebaseio.com",
+  databaseUrl: "https://biomedicalequipment-23d7c-default-rtdb.firebaseio.com",
 
   // مفتاح API لخدمة رفع الصور ImgBB (ImgBB API Key)
   // يمكنك الحصول عليه مجاناً وبسرعة من: https://api.imgbb.com/
@@ -28,5 +28,5 @@ export const ADMIN_CREDENTIALS = {
  * App Data Version
  * تغيير هذا الإصدار سيجبر متصفحات العملاء على مسح التخزين المؤقت القديم والمزامنة مجدداً من السحابة.
  */
-export const APP_VERSION = "1.0.1";
+export const APP_VERSION = "1.0.2";
 
