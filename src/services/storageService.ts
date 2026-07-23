@@ -524,15 +524,15 @@ export const VideoDb = {
 };
 
 const KEYS = {
-  THEME: "ecommerce_theme_config",
-  CATEGORIES: "ecommerce_categories",
-  STORE_INFO: "ecommerce_store_info",
-  HOMEPAGE: "ecommerce_homepage_blocks",
-  PAGES: "ecommerce_pages_content",
-  CART: "ecommerce_cart_items",
-  WISHLIST: "ecommerce_wishlist_items",
-  COUPONS: "ecommerce_coupons",
-  PRODUCTS: "ecommerce_products"
+  THEME: "thiam_theme_config",
+  CATEGORIES: "thiam_categories",
+  STORE_INFO: "thiam_store_info",
+  HOMEPAGE: "thiam_homepage_blocks",
+  PAGES: "thiam_pages_content",
+  CART: "thiam_cart_items",
+  WISHLIST: "thiam_wishlist_items",
+  COUPONS: "thiam_coupons",
+  PRODUCTS: "thiam_products"
 };
 
 const DEFAULT_COUPONS = [
@@ -558,7 +558,7 @@ export const StorageService = {
       localStorage.removeItem(KEYS.COUPONS);
       localStorage.removeItem(KEYS.CART);
       localStorage.removeItem(KEYS.WISHLIST);
-      localStorage.removeItem("ecommerce_cloud_settings");
+      localStorage.removeItem("thiam_cloud_settings");
       
       localStorage.setItem("thiam_store_version", APP_VERSION);
     }
@@ -623,7 +623,7 @@ export const StorageService = {
       imgbbApiKey: CLOUD_CONFIG.imgbbApiKey || ""
     };
     try {
-      const stored = localStorage.getItem("ecommerce_cloud_settings");
+      const stored = localStorage.getItem("thiam_cloud_settings");
       if (stored) {
         const parsed = JSON.parse(stored);
         return {
@@ -638,7 +638,7 @@ export const StorageService = {
   },
 
   saveCloudSettings(settings: CloudSettings): void {
-    localStorage.setItem("ecommerce_cloud_settings", JSON.stringify(settings));
+    localStorage.setItem("thiam_cloud_settings", JSON.stringify(settings));
   },
 
   async syncFromCloud(): Promise<boolean> {
