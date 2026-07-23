@@ -22,3 +22,11 @@ export const ADMIN_CREDENTIALS = {
   email: "thiamshop1230@gmail.com",
   password: "thiam12345678"
 };
+
+/**
+ * إصدار قاعدة البيانات والبيانات المحلية للمتجر
+ * App Data Version
+ * تغيير هذا الإصدار سيجبر متصفحات العملاء على مسح التخزين المؤقت القديم والمزامنة مجدداً من السحابة.
+ */
+export const APP_VERSION = "1.0.1";
+

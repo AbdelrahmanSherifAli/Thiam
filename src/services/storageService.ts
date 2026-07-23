@@ -1,6 +1,6 @@
 // Storage Service for single-tenant ThemeForest-style E-Commerce Template
 // This service abstracts all localStorage operations.
-import { CLOUD_CONFIG } from "../config";
+import { CLOUD_CONFIG, APP_VERSION } from "../config";
 
 export interface CloudSettings {
   databaseUrl: string;
@@ -546,6 +546,23 @@ const DEFAULT_COUPONS = [
 export const StorageService = {
   // Central init function to seed defaults if missing
   init() {
+    // Check version and clear old local caches if mismatched to force database re-sync
+    const storedVersion = localStorage.getItem("thiam_store_version");
+    if (storedVersion !== APP_VERSION) {
+      localStorage.removeItem(KEYS.THEME);
+      localStorage.removeItem(KEYS.CATEGORIES);
+      localStorage.removeItem(KEYS.PRODUCTS);
+      localStorage.removeItem(KEYS.STORE_INFO);
+      localStorage.removeItem(KEYS.HOMEPAGE);
+      localStorage.removeItem(KEYS.PAGES);
+      localStorage.removeItem(KEYS.COUPONS);
+      localStorage.removeItem(KEYS.CART);
+      localStorage.removeItem(KEYS.WISHLIST);
+      localStorage.removeItem("ecommerce_cloud_settings");
+      
+      localStorage.setItem("thiam_store_version", APP_VERSION);
+    }
+
     // Check if localStorage has old perfume data, migrate to Gym theme
     const existingTheme = localStorage.getItem(KEYS.THEME);
     if (existingTheme && (existingTheme.includes("maisonoud") || existingTheme.includes("عود") || existingTheme.includes("Outfit"))) {
