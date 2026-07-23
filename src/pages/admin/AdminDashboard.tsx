@@ -3732,8 +3732,8 @@ export const AdminDashboard: React.FC = () => {
                       const cleanColor = color.trim();
                       return (
                         <div key={color} style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "#ffffff", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-                          {/* Color Picker & Name */}
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: "150px" }}>
+                          {/* Color Picker, Hex Code, & Name */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: "250px" }}>
                             <input
                               type="color"
                               value={prodColorCodes[cleanColor] || "#cccccc"}
@@ -3751,11 +3751,35 @@ export const AdminDashboard: React.FC = () => {
                                 cursor: "pointer",
                                 padding: 0,
                                 backgroundColor: "transparent",
-                                overflow: "hidden"
+                                overflow: "hidden",
+                                flexShrink: 0
                               }}
                               title="تحديد درجة اللون"
                             />
-                            <span style={{ fontSize: "12px", fontWeight: "600" }}>{cleanColor}</span>
+                            <input
+                              type="text"
+                              value={prodColorCodes[cleanColor] || ""}
+                              onChange={(e) => {
+                                const hex = e.target.value;
+                                setProdColorCodes(prev => ({
+                                  ...prev,
+                                  [cleanColor]: hex
+                                }));
+                              }}
+                              placeholder="#ffffff"
+                              className="admin-input"
+                              style={{
+                                width: "85px",
+                                height: "30px",
+                                padding: "2px 8px",
+                                fontSize: "12px",
+                                fontFamily: "monospace",
+                                textTransform: "lowercase",
+                                margin: 0,
+                                direction: "ltr"
+                              }}
+                            />
+                            <span style={{ fontSize: "12px", fontWeight: "600", whiteSpace: "nowrap" }}>{cleanColor}</span>
                           </div>
 
                           {/* Image upload section */}
